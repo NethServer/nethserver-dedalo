@@ -1,0 +1,19 @@
+#
+# 30http_access_40_dedalo
+#
+
+{
+    my $status = $dedalo{'status'} || 'disabled';
+    my $proxy = $dedalo{'Proxy'} || 'disabled';
+    my $filter = $dedalo{'ContentFilter'} || 'disabled';
+    if ( $status eq 'enabled' && $proxy eq 'enabled' ) {
+        $OUT .= "# No authentication on dedalo\n";
+        $OUT .= "http_access allow dedalo\n";
+        if ( $filter eq 'disabled') {
+            $OUT .= "# Skip URL rewriter for dedalo\n";
+            $OUT .= "acl dedalo_http_port port 80\n";
+            $OUT .= "acl dedalo_http_port port 443\n";
+            $OUT .= "url_rewrite_access deny dedalo dedalo_http_port\n";
+        }
+    }
+}

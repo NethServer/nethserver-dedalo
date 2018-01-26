@@ -1,6 +1,8 @@
-#!/usr/bin/perl -w
+#!/bin/bash
+
 #
 # Copyright (C) 2018 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
 #
 # This script is part of NethServer.
 #
@@ -15,41 +17,20 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
+# along with NethServer.  If not, see COPYING.
 #
 
-use esmith::Build::CreateLinks qw(:all);
+uuid=$(/sbin/e-smith/config getprop dedalo Uuid)
+unit_name=$(/sbin/e-smith/config getprop dedalo UnitName)
 
-#
-# nethserver-dedalo-update event
-#
+if [ -z "$uuid" ]; then
+    /sbin/e-smith/config setprop dedalo Uuid $(uuidgen)
+fi
 
-my $event = 'nethserver-dedalo-update';
+if [ -z "$unit_name" ]; then
+    /sbin/e-smith/config setprop dedalo UnitName $(hostnamectl status --static)
+fi
 
-event_actions($event, qw(
-    initialize-default-databases 00
-    nethserver-dedalo-conf 20
-));
 
-event_templates($event,
-   '/opt/icaro/dedalo/config'
-);
-
-#
-# nethserver-dedalo-save event
-#
-
-$event = 'nethserver-dedalo-save';
-
-event_templates($event,
-   '/opt/icaro/dedalo/config'
-);
-
-event_actions($event, qw(
-    nethserver-dedalo-conf 20
-    firewall-adjust 30
-));
-
-event_services($event, qw(
-    dedalo restart
-));
+# Apply configuration
+dedalo config

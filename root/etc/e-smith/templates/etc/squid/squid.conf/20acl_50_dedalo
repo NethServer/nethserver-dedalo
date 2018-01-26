@@ -1,0 +1,22 @@
+#
+# 20acl_50_dedalo
+#
+
+{
+    my $status = $dedalo{'status'} || 'disabled';
+    my $proxy = $dedalo{'Proxy'} || 'disabled';
+    my $log = $dedalo{'LogTraffic'} || 'disabled';
+    my $net = $dedalo{'DynamicNet'} || '192.168.182.0/24';
+    my $ndb = esmith::NetworksDB->open_ro() || return;
+    if ( $status eq 'enabled' && $proxy eq 'enabled' ) {
+        $OUT .= "# Allow access from dedalo\n";
+        $OUT .= "acl dedalo src $net\n";
+
+        if ( $log eq 'enabled' ) {
+            $OUT .= "access_log daemon:/var/log/squid/dedalo.log squid dedalo\n";
+        } else {
+            $OUT .= "access_log none dedalo\n";
+        }
+        $OUT .= "access_log daemon:/var/log/squid/access.log squid\n";
+    }
+}

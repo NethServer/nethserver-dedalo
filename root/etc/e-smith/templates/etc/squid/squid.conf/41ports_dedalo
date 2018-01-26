@@ -1,9 +1,9 @@
 {
    my $green_mode = $squid{'GreenMode'} || "manual";
-   my $hs_proxy = $hotspot{'Proxy'} || "disabled";
+   my $hs_proxy = $dedalo{'Proxy'} || "disabled";
 
    if ($hs_proxy eq 'enabled') {
-       $OUT.="\n# Enable transparent proxy for hotspot\n";
+       $OUT.="\n# Enable transparent proxy for dedalo\n";
        $OUT.="http_port 3131 transparent\n";
        $OUT.="https_port 3132 intercept ssl-bump generate-host-certificates=off cert=/etc/pki/tls/certs/NSRV.crt key=/etc/pki/tls/private/NSRV.key sslflags=NO_DEFAULT_CA options=NO_SSLv2,NO_SSLv3,No_Compression dynamic_cert_mem_cache_size=128KB\n";
    }

@@ -1,15 +1,15 @@
 #
-# 90hotspot
+# 90dedalo
 #
 
 {
     use esmith::NetworksDB;
-    my $status = $hotspot{'status'} || 'disabled';
-    my $proxy = $hotspot{'Proxy'} || 'disabled';
+    my $status = $dedalo{'status'} || 'disabled';
+    my $proxy = $dedalo{'Proxy'} || 'disabled';
     my $ndb = esmith::NetworksDB->open_ro() || return;
-    my @device = $ndb->get_all_by_prop('role' => 'hotspot');
+    my @device = $ndb->get_all_by_prop('role' => 'dedalo');
     if ( $status eq 'enabled' &&  defined($device[0]) ) {
-        $OUT .= '?COMMENT hotspot'. "\n";
+        $OUT .= '?COMMENT dedalo'. "\n";
         $OUT .= 'ACCEPT  hotsp   $FW     tcp     3990'. "\n";
         $OUT .= 'ACCEPT  hotsp   $FW     tcp     3991'. "\n";
         $OUT .= 'ACCEPT  hotsp   $FW     tcp     4990'. "\n";
