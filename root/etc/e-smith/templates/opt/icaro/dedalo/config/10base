@@ -1,19 +1,39 @@
 {
+
   use esmith::NetworksDB;
+  use URI;
   my $ndb = esmith::NetworksDB->open_ro() || return;
   my @devices = $ndb->get_all_by_prop('role' => 'hotspot');
-  our $hs_interface = defined($devices[0]) ? $devices[0] : '';
+  our $hs_interface = defined($devices[0]) ? $devices[0]->key : '';
+  our $hs_network = $dedalo{'Network'} || '';
   our $hs_splash_page_url = $dedalo{'SplashPageUrl'} || '';
+  my $u = URI->new($hs_splash_page_url);
+
   our $hs_aaa_url = $dedalo{'AaaUrl'} || '';
+  if ($hs_aaa_url eq '' && $hs_splash_page_url ne '') {
+      $hs_aaa_url =  "https://". $u->host . "/wax/aaa";
+  }
+
   our $hs_api_url = $dedalo{'ApiUrl'} || '';
+  if ($hs_api_url eq '' && $hs_splash_page_url ne '') {
+      $hs_api_url =  "https://". $u->host . "/api";
+  }
+
   our $hs_id = $dedalo{'Id'} || '';
   our $hs_unit_name = $dedalo{'UnitName'} || '';
   our $hs_uuid = $dedalo{'Uuid'} || '';
   our $hs_secret = $dedalo{'UnitName'} || '';
-  our $hs_allow_origins = $dedalo{'AllowOrigins'} || '*';
-  
+  our $hs_allow_origins = $dedalo{'AllowOrigins'} || "";
+  if ($hs_allow_origins eq '' && $hs_splash_page_url ne '') {
+      $hs_allow_origins = $u->scheme ."://". $u->host;
+  } else {
+      $hs_allow_origins = "*";
+  }
+
+  return '';
 }
 HS_INTERFACE="{{$hs_interface}}"
+HS_NETWORK="{{$hs_network}}"
 HS_SPLASH_PAGE_URL="{{$hs_splash_page_url}}"
 HS_AAA_URL="{{$hs_aaa_url}}"
 HS_API_URL="{{$hs_api_url}}"
