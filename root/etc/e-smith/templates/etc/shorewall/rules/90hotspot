@@ -1,0 +1,32 @@
+#
+# 90hotspot
+#
+
+{
+    use esmith::NetworksDB;
+    my $status = $hotspot{'status'} || 'disabled';
+    my $proxy = $hotspot{'Proxy'} || 'disabled';
+    my $ndb = esmith::NetworksDB->open_ro() || return;
+    my @device = $ndb->get_all_by_prop('role' => 'hotspot');
+    if ( $status eq 'enabled' &&  defined($device[0]) ) {
+        $OUT .= '?COMMENT hotspot'. "\n";
+        $OUT .= 'ACCEPT  hotsp   $FW     tcp     3990'. "\n";
+        $OUT .= 'ACCEPT  hotsp   $FW     tcp     3991'. "\n";
+        $OUT .= 'ACCEPT  hotsp   $FW     tcp     4990'. "\n";
+        $OUT .= 'ACCEPT  hotsp   $FW     udp     67,68'. "\n";
+        $OUT .= 'ACCEPT  hotsp   $FW     udp     53'. "\n";
+        $OUT .= "# Avoid duplicated traffic\n";
+        $OUT .= "DROP    hotsp:".$device[0]->key."  any\n";
+        $OUT .= 'ACCEPT  hotsp   net'. "\n";
+
+        if ($proxy eq 'enabled') {
+            $OUT .= "\n?COMMENT transparent proxy on hotsp for port 80\n";
+            $OUT .= "ACCEPT    hotsp    \$FW    tcp    3131\n";
+            $OUT .= "ACCEPT    hotsp    \$FW    tcp    3132\n";
+            $OUT .= "REDIRECT    hotsp    3131    tcp    80\n";
+            $OUT .= "REDIRECT    hotsp    3132    tcp    443\n";
+            $OUT .= "?COMMENT";
+        }
+        $OUT .= "DROP    hotsp   \$FW\n";
+    }
+}

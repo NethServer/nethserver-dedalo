@@ -1,0 +1,19 @@
+#
+# 30http_access_40_hotspot
+#
+
+{
+    my $status = $hotspot{'status'} || 'disabled';
+    my $proxy = $hotspot{'Proxy'} || 'disabled';
+    my $filter = $hotspot{'ContentFilter'} || 'disabled';
+    if ( $status eq 'enabled' && $proxy eq 'enabled' ) {
+        $OUT .= "# No authentication on hotspot\n";
+        $OUT .= "http_access allow hotspot\n";
+        if ( $filter eq 'disabled') {
+            $OUT .= "# Skip URL rewriter for hotspot\n";
+            $OUT .= "acl hotspot_http_port port 80\n";
+            $OUT .= "acl hotspot_http_port port 443\n";
+            $OUT .= "url_rewrite_access deny hotspot hotspot_http_port\n";
+        }
+    }
+}

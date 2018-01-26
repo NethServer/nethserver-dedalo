@@ -1,0 +1,22 @@
+#
+# 20acl_50_hotspot
+#
+
+{
+    my $status = $hotspot{'status'} || 'disabled';
+    my $proxy = $hotspot{'Proxy'} || 'disabled';
+    my $log = $hotspot{'LogTraffic'} || 'disabled';
+    my $net = $hotspot{'DynamicNet'} || '192.168.182.0/24';
+    my $ndb = esmith::NetworksDB->open_ro() || return;
+    if ( $status eq 'enabled' && $proxy eq 'enabled' ) {
+        $OUT .= "# Allow access from hotspot\n";
+        $OUT .= "acl hotspot src $net\n";
+
+        if ( $log eq 'enabled' ) {
+            $OUT .= "access_log daemon:/var/log/squid/hotspot.log squid hotspot\n";
+        } else {
+            $OUT .= "access_log none hotspot\n";
+        }
+        $OUT .= "access_log daemon:/var/log/squid/access.log squid\n";
+    }
+}

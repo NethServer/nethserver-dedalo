@@ -1,0 +1,15 @@
+#
+# 10base30hotspot
+#
+
+{
+    use esmith::NetworksDB;
+    my $status = $hotspot{'status'} || 'disabled';
+    my $ndb = esmith::NetworksDB->open_ro() || return;
+    my @device = $ndb->get_all_by_prop('role' => 'hotspot');
+    if ( $status eq 'enabled' &&  defined($device[0]) ) {
+        $OUT .= "# Avoid duplicated traffic\n";
+        $OUT .= "DROP\thotsp:".$device[0]->key."\tnet\n";
+    }
+
+}

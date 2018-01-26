@@ -1,0 +1,5 @@
+#
+# 90hotspot
+#
+
+hotsp	tunspot	tcpflags,nosmurfs

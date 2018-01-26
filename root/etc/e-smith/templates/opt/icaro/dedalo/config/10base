@@ -1,0 +1,24 @@
+{
+  use esmith::NetworksDB;
+  my $ndb = esmith::NetworksDB->open_ro() || return;
+  my @devices = $ndb->get_all_by_prop('role' => 'hotspot');
+  our $hs_interface = defined($devices[0]) ? $devices[0] : '';
+  our $hs_splash_page_url = $dedalo{'SplashPageUrl'} || '';
+  our $hs_aaa_url = $dedalo{'AaaUrl'} || '';
+  our $hs_api_url = $dedalo{'ApiUrl'} || '';
+  our $hs_id = $dedalo{'Id'} || '';
+  our $hs_unit_name = $dedalo{'UnitName'} || '';
+  our $hs_uuid = $dedalo{'Uuid'} || '';
+  our $hs_secret = $dedalo{'UnitName'} || '';
+  our $hs_allow_origins = $dedalo{'AllowOrigins'} || '*';
+  
+}
+HS_INTERFACE="{{$hs_interface}}"
+HS_SPLASH_PAGE_URL="{{$hs_splash_page_url}}"
+HS_AAA_URL="{{$hs_aaa_url}}"
+HS_API_URL="{{$hs_api_url}}"
+HS_ID="{{$hs_id}}"
+HS_UNIT_NAME="{{$hs_unit_name}}"
+HS_UUID="{{$hs_uuid}}"
+HS_SECRET="{{$hs_secret}}"
+HS_ALLOW_ORIGINS="{{$hs_allow_origins}}"

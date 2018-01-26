@@ -1,0 +1,36 @@
+<?php
+
+$L['Hotspot_header'] = 'Change current hotspot settings';
+$L['Hotspot_Description'] = 'Set hotspot settings';
+$L['Hotspot_Tags'] = 'hotspot web';
+$L['Hotspot_Title'] = 'Hotspot';
+$L['status_label'] = 'Status';
+$L['LogTraffic_label'] = 'Log traffic';
+$L['Header_label'] = 'Header';
+$L['Footer_label'] = 'Footer';
+$L['Device_label'] = 'Network Device';
+$L['DynamicNet_label'] = 'Network';
+$L['ContentFilter_label'] = 'Enable content filter';
+$L['AllowedSites_label'] = 'Allowed Sites';
+$L['AllowedSitesToShow_label'] = 'Allowed sites to show';
+$L['Disclaimer_label'] = 'Disclaimer';
+$L['MarketingDisclaimer_label'] = 'Marketing Disclaimer';
+$L['General_Title'] = 'General';
+$L['Network_Title'] = 'Network';
+$L['Server_Title'] = 'Server';
+$L['Portal_Title'] = 'Portal';
+$L['Preview_Title'] = 'Preview';
+$L['RadiusServer1_label'] = 'Hostname / IP';
+$L['Secret_label'] = 'Secret';
+$L['AuthPort_label'] = 'Authentication Port';
+$L['AcctPort_label'] = 'Accounting Port';
+$L['hotspot_assigned_label'] = 'hotspot assigned';
+$L['enabled_label'] = 'Enable';
+$L['disabled_label'] = 'Disable';
+$L['all_open_label'] = 'All Opened';
+$L['all_closed_label'] = 'All Closed';
+$L['HotspotProxy_label'] = 'Web proxy';
+$L['Proxy_label'] = 'Enable transparent proxy on hotspot';
+$L['Hotspot_warning'] = '<b>WARNING</b>: this is a preview';
+$L['Hotspot_first_line'] = 'the buttons are not working';
+$L['Hotspot_second_line'] = 'the buttons are showed also if not enabled';
