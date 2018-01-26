@@ -9,7 +9,7 @@ URL: https://github.com/nethesis/icaro
 Source: %{name}-%{version}.tar.gz
 
 BuildRequires: nethserver-devtools
-Requires: openvpn, openssh-server, dedalo
+Requires: nethserver-firewall-base, dedalo
 
 %description
 Dedalo capitve portal based on CoovaChilli
