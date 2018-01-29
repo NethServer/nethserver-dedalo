@@ -2,6 +2,7 @@
 
   use esmith::NetworksDB;
   use URI;
+  use NethServer::Password;
   my $ndb = esmith::NetworksDB->open_ro() || return;
   my @devices = $ndb->get_all_by_prop('role' => 'hotspot');
   our $hs_interface = defined($devices[0]) ? $devices[0]->key : '';
@@ -22,7 +23,7 @@
   our $hs_id = $dedalo{'Id'} || '';
   our $hs_unit_name = $dedalo{'UnitName'} || '';
   our $hs_uuid = $dedalo{'Uuid'} || '';
-  our $hs_secret = $dedalo{'UnitName'} || '';
+  our $hs_secret = NethServer::Password::store('dedalo');;
   our $hs_allow_origins = $dedalo{'AllowOrigins'} || "";
   if ($hs_allow_origins eq '' && $hs_splash_page_url ne '') {
       $hs_allow_origins = $u->scheme ."://". $u->host;
