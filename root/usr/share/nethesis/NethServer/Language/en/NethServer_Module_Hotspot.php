@@ -29,3 +29,5 @@ $L['Register_header'] = 'Register this unit on ${0}';
 $L['Register_label'] = 'Register';
 
 $L['Unregister_label'] = 'Unregister';
+$L['Unregister_header'] = 'Unregister unit';
+$L['Unregister_message'] = 'Would you like to unregister this unit?';

@@ -38,10 +38,10 @@ class Register extends \Nethgui\Controller\AbstractController
     {
         $ret = array();
         $icaroSessionToken = $this->getPlatform()->getDatabase('SESSION')->getType('IcaroSession');
-        $this->stash = new \NethServer\Tool\PasswordStash();
-        $this->stash->store($icaroSessionToken);
+        $stash = new \NethServer\Tool\PasswordStash();
+        $stash->store($icaroSessionToken);
         $host = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo','IcaroHost');
-        $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-hotspot-list ${@}', array($host, $this->stash->getFilePath()));
+        $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-hotspot-list ${@}', array($host, $stash->getFilePath()));
         $hotspots = json_decode($process->getOutput(),TRUE);
         foreach ($hotspots as $hotspot) {
             $ret[] = array($hotspot['name'], $hotspot['name']." (".$hotspot['description'].")");
@@ -78,7 +78,9 @@ class Register extends \Nethgui\Controller\AbstractController
     {
         $sessDb = $this->getPlatform()->getDatabase('SESSION');
         $icaroSessionToken = $sessDb->getType('IcaroSession');
-        $this->getPlatform()->signalEvent('nethserver-dedalo-register &', array($icaroSessionToken));
+        $stash = new \NethServer\Tool\PasswordStash();
+        $stash->store($icaroSessionToken);
+        $this->getPlatform()->signalEvent('nethserver-dedalo-register &', array($stash->getFilePath()));
     }
 
 }

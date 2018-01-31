@@ -49,12 +49,12 @@ class Auth extends \Nethgui\Controller\AbstractController
             return;
         }
 
-        $this->stash = new \NethServer\Tool\PasswordStash();
+        $stash = new \NethServer\Tool\PasswordStash();
         $host = $this->getRequest()->getParameter('IcaroHost'); 
         $username = $this->getRequest()->getParameter('Username');
         $password = $this->getRequest()->getParameter('Password');
-        $this->stash->store(json_encode(array( "username" => $username, "password" => $password)));
-        $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-authentication ${@}', array($host, $this->stash->getFilePath()));
+        $stash->store(json_encode(array( "username" => $username, "password" => $password)));
+        $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-authentication ${@}', array($host, $stash->getFilePath()));
         $result = json_decode($process->getOutput(),TRUE);
         $loginSuccessful = isset($result['token']);
         if($loginSuccessful) {

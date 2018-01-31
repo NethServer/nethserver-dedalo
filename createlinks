@@ -46,10 +46,44 @@ event_templates($event,
 );
 
 event_actions($event, qw(
-    nethserver-dedalo-conf 20
     firewall-adjust 30
 ));
 
 event_services($event, qw(
     dedalo restart
 ));
+
+#
+# nethserver-dedalo-register event
+#
+
+$event = 'nethserver-dedalo-register';
+
+event_templates($event,
+   '/opt/icaro/dedalo/config'
+);
+
+event_actions($event, qw(
+    nethserver-dedalo-register 20
+    firewall-adjust 30
+));
+
+event_services($event, qw(
+    dedalo restart
+));
+
+#
+# nethserver-dedalo-unregister event
+#
+
+$event = 'nethserver-dedalo-unregister';
+
+event_actions($event, qw(
+    nethserver-dedalo-unregister 20
+    firewall-adjust 30
+));
+
+event_services($event, qw(
+    dedalo stop
+));
+

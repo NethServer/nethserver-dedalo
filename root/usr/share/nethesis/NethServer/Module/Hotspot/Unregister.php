@@ -25,14 +25,20 @@ class Unregister extends \Nethgui\Controller\AbstractController
 {
     public function prepareView(\Nethgui\View\ViewInterface $view) {
         parent::prepareView($view);
-        if($this->getRequest()->isValidated()) {
-            if( ! $this->getRequest()->isMutation()) {
+        if($this->getRequest()->isMutation()) {
+            $this->getPlatform()->setDetachedProcessCondition('success', array(
+                'location' => array(
+                'url' => $view->getModuleUrl('/Hotspot/Wizard/Auth'),
+                    'freeze' => TRUE,
+                )));
+        } else {
                 $view->getCommandList()->show();
-            }
         }
     }
-    protected function onParametersSaved($changes)
+    public function process()
     {
-        $this->getPlatform()->signalEvent('nethserver-dedalo-unregister &');
+        if ($this->getRequest()->isMutation()) {
+            $this->getPlatform()->signalEvent('nethserver-dedalo-unregister &');
+        }
     }
 }
