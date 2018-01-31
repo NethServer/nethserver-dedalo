@@ -43,7 +43,7 @@ class Configuration extends \Nethgui\Controller\AbstractController implements \N
     {
         parent::prepareView($view);
         $view['DeviceDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($this->initNetworkDevicesList($view));
-        $view['UnitName'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'UnitName');
+        $view['UnitName'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'UnitName') . " (" .$this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'Uuid'). ")";
         $view['Id'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'Id');
         $view['Unregister'] = $view->getModuleUrl('../Unregister');
         $view['ProxyEnabled'] = $this->getPlatform()->getDatabase('configuration')->getProp('squid', 'status') == "enabled";
