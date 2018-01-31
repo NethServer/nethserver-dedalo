@@ -23,4 +23,4 @@
 set -e 
 
 # Enable dedalo service
-/sbin/e-smith/config setprop dedalo status disabled
+/sbin/e-smith/config setprop dedalo status disabled Id ''
