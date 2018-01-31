@@ -27,10 +27,5 @@ if [ -z "$uuid" ]; then
     /sbin/e-smith/config setprop dedalo Uuid $(uuidgen)
 fi
 
-if [ -z "$unit_name" ]; then
-    /sbin/e-smith/config setprop dedalo UnitName $(hostnamectl status --static)
-fi
-
-
 # Apply configuration
 dedalo config
