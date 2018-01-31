@@ -3,7 +3,7 @@
 /* @var $view \Nethgui\Renderer\Xhtml */
 echo $view->header()->setAttribute('template', $T('Auth_header'));
 
-echo $view->textInput('IcaroHost', $view['IcaroHost'] ? $view::STATE_DISABLED | $view::STATE_READONLY : 0);
+echo $view->textInput('IcaroHost', $view['IcaroHost'] ? $view::STATE_READONLY : 0);
 echo $view->textInput('Username');
 echo $view->textInput('Password', $view::TEXTINPUT_PASSWORD);
 

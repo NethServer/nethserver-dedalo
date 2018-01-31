@@ -34,6 +34,21 @@ class Register extends \Nethgui\Controller\AbstractController
         $this->declareParameter('Device', Validate::NOTEMPTY, array());
     }
 
+    private function listHotspots()
+    {
+        $ret = array();
+        $icaroSessionToken = $this->getPlatform()->getDatabase('SESSION')->getType('IcaroSession');
+        $this->stash = new \NethServer\Tool\PasswordStash();
+        $this->stash->store($icaroSessionToken);
+        $host = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo','IcaroHost');
+        $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-hotspot-list ${@}', array($host, $this->stash->getFilePath()));
+        $hotspots = json_decode($process->getOutput(),TRUE);
+        foreach ($hotspots as $hotspot) {
+            $ret[] = array($hotspot['name'], $hotspot['name']." (".$hotspot['description'].")");
+        }
+        return $ret;
+    }
+
     public function prepareView(\Nethgui\View\ViewInterface $view) {
         parent::prepareView($view);
         $view['configuration'] = $view->getModuleUrl('../../Configuration');
@@ -42,7 +57,7 @@ class Register extends \Nethgui\Controller\AbstractController
         if($this->getRequest()->isValidated()) {
             $view['IcaroHost'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'IcaroHost');
             $view['DeviceDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($this->initNetworkDevicesList($view));
-            $view['IdDatasource'] = array(); // XXX invoke remote method to get the list of available hotspot instances
+            $view['IdDatasource'] = $this->listHotspots();
 
             if( ! $view['UnitName']) {
                 $view['UnitName'] = \gethostname();

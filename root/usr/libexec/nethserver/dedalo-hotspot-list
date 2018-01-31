@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2018 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+HOST=$1
+TMP_FILE=$2
+
+function help
+{
+    echo "$0 <hostname> <temp_file>"
+
+    echo "Please specify a temporary file with a valid authentication token."
+    exit 1
+}
+
+if [ -z "$HOST" ]; then
+    help
+fi
+
+if [ -z "$TMP_FILE" ] || [ ! -f $TMP_FILE ]; then
+    help
+fi
+
+token=$(cat $TMP_FILE)
+curl -s --request GET --url https://$HOST/api/hotspots --header "Token: $token"
+
+rm -f $TMP_FILE

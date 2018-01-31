@@ -49,12 +49,18 @@ class Auth extends \Nethgui\Controller\AbstractController
             return;
         }
 
-        // XXX RUN the login helper 
-        $loginSuccessful = TRUE;
+        $this->stash = new \NethServer\Tool\PasswordStash();
+        $host = $this->getRequest()->getParameter('IcaroHost'); 
+        $username = $this->getRequest()->getParameter('Username');
+        $password = $this->getRequest()->getParameter('Password');
+        $this->stash->store(json_encode(array( "username" => $username, "password" => $password)));
+        $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-authentication ${@}', array($host, $this->stash->getFilePath()));
+        $result = json_decode($process->getOutput(),TRUE);
+        $loginSuccessful = isset($result['token']);
         if($loginSuccessful) {
             // save the authentication token in the user session DB
             $sessDb = $this->getPlatform()->getDatabase('SESSION');
-            $sessDb->setType('IcaroSession', $icaroSessionToken);
+            $sessDb->setType('IcaroSession', $result['token']);
         } else {
             $report->addValidationErrorMessage($this, 'authentication_validator', 'icaro_auth_failed');
         }
