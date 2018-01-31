@@ -1,30 +1,31 @@
 <?php
 
-$L['Hotspot_header'] = 'Change current hotspot settings';
-$L['Hotspot_Description'] = 'Set hotspot settings';
+$L['Hotspot_Title'] = 'Hotspot unit';
+$L['Hotspot_Description'] = 'Bind to a parent hotspot and configure this unit';
 $L['Hotspot_Tags'] = 'hotspot web';
-$L['Hotspot_Title'] = 'Hotspot';
-$L['HotspotStatus_label'] = 'Dedalo Hotspot configuration';
-$L['status_label'] = 'Enable hotspot';
+
+$L['Configuration_header'] = 'Hotspot unit ${0}';
 $L['LogTraffic_label'] = 'Log traffic';
 $L['Device_label'] = 'Network device';
-$L['DynamicNet_label'] = 'Network';
+$L['Network_label'] = 'Network address';
 $L['ContentFilter_label'] = 'Enable content filter';
-$L['Secret_label'] = 'Secret';
 $L['hotspot_assigned_label'] = 'hotspot assigned';
-$L['enabled_label'] = 'Enable';
-$L['disabled_label'] = 'Disable';
 $L['HotspotProxy_label'] = 'Web proxy';
 $L['Proxy_label'] = 'Enable transparent proxy on hotspot';
-$L['SplashPageUrl_label'] = 'Captive portal URL ';
-$L['Id_label'] = 'Parent Hotspot ID from Icaro';
-$L['Advanced_label'] = 'Advanced';
-$L['Uuid_label'] = 'UUID: unique unit identifier';
-$L['UnitName_label'] = 'Unit name description';
-$L['AaaUrl_label'] = 'Wax AAA URL';
-$L['ApiUrl_label'] = 'Sun API URL';
-$L['AllowOrigins_label'] = 'Allow CORS from';
-$L['Advanced_Dedalo_label'] = 'Dedalo (CoovaChilli client)';
-$L['Advanced_Icaro_label'] = 'Icaro (Remote installation)';
-$L['Remote_label'] = 'Icaro remote options';
-$L['Network_label'] = 'Client dynamic network';
+$L['Id_label'] = 'Parent hotspot';
+$L['UnitName_label'] = 'Unit name';
+$L['Save_label'] = 'Save';
+
+$L['Auth_header'] = 'Hotspot unit registration';
+$L['Username_label'] = 'User name';
+$L['Password_label'] = 'Password';
+$L['IcaroHost_label'] = 'Host name';
+$L['Authenticate_label'] = 'Authenticate';
+$L['authentication_validator_label'] = 'Remote authentication failed';
+$L['icaro_auth_failed'] = 'Bad user name or password';
+$L['hotspotRegistrationSuccess_notification'] = 'This unit has been registered successfully';
+
+$L['Register_header'] = 'Register this unit on ${0}';
+$L['Register_label'] = 'Register';
+
+$L['Unregister_label'] = 'Unregister';
