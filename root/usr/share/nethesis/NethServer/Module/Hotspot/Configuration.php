@@ -46,6 +46,8 @@ class Configuration extends \Nethgui\Controller\AbstractController implements \N
         $view['UnitName'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'UnitName');
         $view['Id'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'Id');
         $view['Unregister'] = $view->getModuleUrl('../Unregister');
+        $view['ProxyEnabled'] = $this->getPlatform()->getDatabase('configuration')->getProp('squid', 'status') == "enabled";
+        $view['ContentFilterEnabled'] = $this->getPlatform()->getDatabase('configuration')->getProp('ufdb', 'status') == "enabled";
         if($this->getRequest()->hasParameter('installSuccess')) {
             $this->notifications->message($view->translate('hotspotRegistrationSuccess_notification'));
             $view->getCommandList()->show();
