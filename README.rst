@@ -18,7 +18,7 @@ The whole process is available from the Server Manager, but these are the requir
 
        db networks setprop enps0 role hotspot
    
-2. Configure at least ``SplashPageUrl`` and the hotspot ``Id``.
+2. Configure at least ``IcaroHost`` and the hotspot ``Id``.
    Please note that the hotspot id should be already present inside Icaro installation.
 
 3. Register the unit to Icaro installation. Use valid reseller credentials ::
@@ -32,11 +32,21 @@ The whole process is available from the Server Manager, but these are the requir
 
 At the end Dedalo will create a ``tundedalo`` device which will intercept all traffic from the selected interface (``enps0`` in the above example).
 
+Advanced configuration
+----------------------
+
+The ``IcaroHost`` parameter configures all Icaro URLs and can be used anytime Icaro has been installed
+using the provided provisiong scripts.
+
+In case Icaro installation is split across multiple servers or it uses customized configuration, you
+should manually set ``AaaUrl``, ``SplashPageUrl`` and ``ApiUrl`` parmaters which take precedence over ``IcaroHost``.
+
 Database
 ========
 
 Properties
 
+- ``IcaroHost``: if specified, this parameter is used to automatic calculate: ``AaaUrl``, ``SplashPageUrl``, ``ApiUrl``
 - ``AaaUrl``: (optional) Wax URL, automatically calculated from ``SplashPageUrl``
 - ``AllowOrigins``: (optional) hosts allowed to execute CORS requests to Dedalo, automatically calculated from ``SplashPageUrl``
 - ``ApiUrl``: (optional) Sun URL, automatically calculated from ``SplashPageUrl``
@@ -58,11 +68,12 @@ Example: ::
     AllowOrigins=
     ApiUrl=
     ContentFilter=disabled
+    IcaroHost=hotstpot.nethserver.org
     Id=MyHotel
     LogTraffic=disabled
     Network=192.168.182.0/24
     Proxy=disabled
-    SplashPageUrl=http://hotstpot.nethserver.org
+    SplashPageUrl=
     UnitName=myserver.local.nethserver.org
     Uuid=e7529250-1e44-486e-8b54-ab2ac60d5dcc
     status=enabled
