@@ -31,4 +31,7 @@ dedalo register -t $(cat $tmp_file)
 # Enable dedalo service
 /sbin/e-smith/config setprop dedalo status enabled
 
+# Expand configuratio using dedalo built-in template engine
+dedalo config
+
 rm -f $tmp_file
