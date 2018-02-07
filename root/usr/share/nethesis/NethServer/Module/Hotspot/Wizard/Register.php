@@ -43,6 +43,10 @@ class Register extends \Nethgui\Controller\AbstractController
         $host = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo','IcaroHost');
         $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-hotspot-list ${@}', array($host, $stash->getFilePath()));
         $hotspots = json_decode($process->getOutput(),TRUE);
+        if (isset($hotspots['message'])) {
+            $ret[] = array('',$hotspots['message']);
+            return $ret;
+        }
         foreach ($hotspots as $hotspot) {
             $ret[] = array($hotspot['name'], $hotspot['name']." (".$hotspot['description'].")");
         }
