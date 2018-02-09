@@ -9,7 +9,7 @@
   my $icaro_host = $dedalo{'IcaroHost'} || '';
   our $hs_splash_page_url = $dedalo{'SplashPageUrl'} || '';
   if ($hs_splash_page_url eq '' && $icaro_host ne '') {
-      $hs_splash_page_url = "http://$icaro_host";
+      $hs_splash_page_url = "http://$icaro_host/wings";
   }
 
   our $hs_aaa_url = $dedalo{'AaaUrl'} || '';
