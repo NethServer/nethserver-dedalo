@@ -51,7 +51,7 @@ Properties
 - ``AllowOrigins``: (optional) hosts allowed to execute CORS requests to Dedalo, automatically calculated from ``SplashPageUrl``
 - ``ApiUrl``: (optional) Sun URL, automatically calculated from ``SplashPageUrl``
 - ``Id``: name of the Hotspot already present inside Icaro, eg: ``MyHotelCompany``
-- ``SplashPageUrl``:  Sun (capitve portal) URL
+- ``SplashPageUrl``:  Wings (capitve portal) URL
 - ``UnitName``: descriptive name of local installation, default to FQDN
 - ``Uuid``: auto-generated unique identifier
 - ``Proxy``:  can be ``enabled`` or ``disabled``, if ``enabled`` all hotspot traffic will be proxied
