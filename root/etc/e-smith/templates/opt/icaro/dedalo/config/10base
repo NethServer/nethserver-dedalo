@@ -27,8 +27,8 @@
   our $hs_uuid = $dedalo{'Uuid'} || '';
   our $hs_secret = NethServer::Password::store('dedalo');;
   our $hs_allow_origins = $dedalo{'AllowOrigins'} || "";
-  if ($hs_allow_origins eq '' && $hs_splash_page_url ne '') {
-      $hs_allow_origins = $hs_splash_page_url;
+  if ($hs_allow_origins eq '' && $icaro_host ne '') {
+      $hs_allow_origins = "http://$icaro_host";
   } else {
       $hs_allow_origins = "*";
   }
