@@ -8,7 +8,6 @@ $L['Configuration_header'] = 'Hotspot unit ${0}';
 $L['LogTraffic_label'] = 'Log traffic';
 $L['Device_label'] = 'Network device';
 $L['Network_label'] = 'Network address';
-$L['ContentFilter_label'] = 'Enable content filter';
 $L['hotspot_assigned_label'] = 'hotspot assigned';
 $L['HotspotProxy_label'] = 'Web proxy';
 $L['Proxy_label'] = 'Enable transparent proxy on hotspot';

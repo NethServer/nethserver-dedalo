@@ -35,7 +35,6 @@ class Configuration extends \Nethgui\Controller\AbstractController implements \N
         $this->declareParameter('Device', Validate::NOTEMPTY, array());
         $this->declareParameter('Network', Validate::CIDR_BLOCK, array('configuration', 'dedalo', 'Network'));
         $this->declareParameter('Proxy', Validate::SERVICESTATUS, array('configuration', 'dedalo', 'Proxy'));
-        $this->declareParameter('ContentFilter', Validate::SERVICESTATUS, array('configuration', 'dedalo', 'ContentFilter'));
         $this->declareParameter('LogTraffic', Validate::SERVICESTATUS, array('configuration', 'dedalo', 'LogTraffic'));
     }
 
@@ -47,7 +46,6 @@ class Configuration extends \Nethgui\Controller\AbstractController implements \N
         $view['Id'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'Id');
         $view['Unregister'] = $view->getModuleUrl('../Unregister');
         $view['ProxyEnabled'] = $this->getPlatform()->getDatabase('configuration')->getProp('squid', 'status') == "enabled";
-        $view['ContentFilterEnabled'] = $this->getPlatform()->getDatabase('configuration')->getProp('ufdb', 'status') == "enabled";
         if($this->getRequest()->hasParameter('installSuccess')) {
             $this->notifications->message($view->translate('hotspotRegistrationSuccess_notification'));
             $view->getCommandList()->show();

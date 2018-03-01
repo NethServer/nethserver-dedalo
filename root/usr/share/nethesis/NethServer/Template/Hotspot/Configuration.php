@@ -12,9 +12,6 @@ if ($view['ProxyEnabled']) {
         ->setAttribute('uncheckedValue', 'disabled')
         ->insert($view->checkBox('LogTraffic', 'enabled')->setAttribute('uncheckedValue', 'disabled'))
     ;
-    if($view['ContentFilterEnabled']) {
-        $proxy->insert($view->checkBox('ContentFilter', 'enabled')->setAttribute('uncheckedValue', 'disabled'));
-    }
     echo $proxy;
 }
 
