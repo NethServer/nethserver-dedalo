@@ -80,7 +80,8 @@ $event = 'nethserver-dedalo-unregister';
 
 event_actions($event, qw(
     nethserver-dedalo-unregister 20
-    firewall-adjust 30
+    nethserver-dedalo-proxyconfig 30
+    firewall-adjust 60
 ));
 
 event_services($event, qw(
