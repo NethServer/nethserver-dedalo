@@ -55,7 +55,6 @@ Properties
 - ``UnitName``: descriptive name of local installation, default to FQDN
 - ``Uuid``: auto-generated unique identifier
 - ``Proxy``:  can be ``enabled`` or ``disabled``, if ``enabled`` all hotspot traffic will be proxied
-- ``ContentFilter``: can be ``enabled`` or ``disabled``, if enabled along with Proxy, the traffic will be filtered
 - ``Network``: network for clients connected to Dedalo, default to ``192.168.182.0/24``
 - ``LogTraffic``: can be ``enabled`` or ``disabled``, if enabled along with Proxy, the proxy will log all hotspot traffic inside ``/var/log/squid/dedalo.log``
 - ``status``: can be ``enabled`` or ``disabled``, default to ``disabled``
@@ -67,7 +66,6 @@ Example: ::
     AaaUrl=
     AllowOrigins=
     ApiUrl=
-    ContentFilter=disabled
     IcaroHost=hotstpot.nethserver.org
     Id=MyHotel
     LogTraffic=disabled

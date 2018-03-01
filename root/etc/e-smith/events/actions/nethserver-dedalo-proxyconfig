@@ -23,7 +23,4 @@ if [ $(/sbin/e-smith/config getprop dedalo Proxy) == "enabled" ] && [ $(/sbin/e-
 
     /sbin/e-smith/signal-event nethserver-squid-save
     
-    if [ $(/sbin/e-smith/config getprop dedalo ContentFilter) == "enabled" ] && [ $(/sbin/e-smith/config getprop ufdb status) == "enabled" ]; then
-        /sbin/e-smith/signal-event nethserver-squidguard-save
-    fi
 fi
