@@ -19,7 +19,7 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-if [ $(/sbin/e-smith/config getprop dedalo Proxy) == "enabled" ] && [ $(/sbin/e-smith/config getprop squid status) == "enabled" ]; then
+if [ $(/sbin/e-smith/config getprop squid status) == "enabled" ]; then
 
     /sbin/e-smith/signal-event nethserver-squid-save
     
