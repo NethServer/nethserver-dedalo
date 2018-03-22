@@ -13,6 +13,7 @@ $L['HotspotProxy_label'] = 'Web proxy';
 $L['Proxy_label'] = 'Enable transparent proxy on hotspot';
 $L['Id_label'] = 'Parent hotspot';
 $L['UnitName_label'] = 'Unit name';
+$L['Description_label'] = 'Description';
 $L['Save_label'] = 'Save';
 
 $L['Auth_header'] = 'Hotspot unit registration';

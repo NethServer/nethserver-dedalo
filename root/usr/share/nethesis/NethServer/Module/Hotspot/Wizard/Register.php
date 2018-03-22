@@ -30,6 +30,7 @@ class Register extends \Nethgui\Controller\AbstractController
     {
         parent::initialize();
         $this->declareParameter('UnitName', Validate::HOSTNAME, array('configuration', 'dedalo', 'UnitName'));
+        $this->declareParameter('Description', Validate::ANYTHING, array('configuration', 'dedalo', 'Description'));
         $this->declareParameter('Id', Validate::NOTEMPTY, array('configuration', 'dedalo', 'Id'));
         $this->declareParameter('Device', Validate::NOTEMPTY, array());
     }
@@ -57,7 +58,7 @@ class Register extends \Nethgui\Controller\AbstractController
         parent::prepareView($view);
         $view['configuration'] = $view->getModuleUrl('../../Configuration');
         $view['Back'] = $view->getModuleUrl('../Auth');
-        
+
         if($this->getRequest()->isValidated()) {
             $view['IcaroHost'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'IcaroHost');
             $view['DeviceDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($this->initNetworkDevicesList($view));
@@ -77,7 +78,7 @@ class Register extends \Nethgui\Controller\AbstractController
             }
         }
     }
-    
+
     protected function onParametersSaved($changes)
     {
         $sessDb = $this->getPlatform()->getDatabase('SESSION');
