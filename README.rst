@@ -17,7 +17,7 @@ The whole process is available from the Server Manager, but these are the requir
    The interfarce could also be a VLAN. ::
 
        db networks setprop enps0 role hotspot
-   
+
 2. Configure at least ``IcaroHost`` and the hotspot ``Id``.
    Please note that the hotspot id should be already present inside Icaro installation.
 
@@ -50,9 +50,10 @@ Properties
 - ``AaaUrl``: (optional) Wax URL, automatically calculated from ``SplashPageUrl``
 - ``AllowOrigins``: (optional) hosts allowed to execute CORS requests to Dedalo, automatically calculated from ``SplashPageUrl``
 - ``ApiUrl``: (optional) Sun URL, automatically calculated from ``SplashPageUrl``
+- ``Description``: a descriptive name of local installation, eg: ``MyHotelAtTheSea``
 - ``Id``: name of the Hotspot already present inside Icaro, eg: ``MyHotelCompany``
 - ``SplashPageUrl``:  Wings (capitve portal) URL
-- ``UnitName``: descriptive name of local installation, default to FQDN
+- ``UnitName``: hostname of local installation, default to FQDN
 - ``Uuid``: auto-generated unique identifier
 - ``Proxy``:  can be ``enabled`` or ``disabled``, if ``enabled`` all hotspot traffic will be proxied
 - ``Network``: network for clients connected to Dedalo, default to ``192.168.182.0/24``
@@ -66,6 +67,7 @@ Example: ::
     AaaUrl=
     AllowOrigins=
     ApiUrl=
+    Description=MyLabel
     IcaroHost=hotstpot.nethserver.org
     Id=MyHotel
     LogTraffic=disabled
