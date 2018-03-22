@@ -24,6 +24,7 @@
 
   our $hs_id = $dedalo{'Id'} || '';
   our $hs_unit_name = $dedalo{'UnitName'} || '';
+  our $hs_unit_desc = $dedalo{'Description'} || '';
   our $hs_uuid = $dedalo{'Uuid'} || '';
   our $hs_secret = NethServer::Password::store('dedalo');;
   our $hs_allow_origins = $dedalo{'AllowOrigins'} || "";
@@ -42,6 +43,7 @@ HS_AAA_URL="{{$hs_aaa_url}}"
 HS_API_URL="{{$hs_api_url}}"
 HS_ID="{{$hs_id}}"
 HS_UNIT_NAME="{{$hs_unit_name}}"
+HS_UNIT_DESC="{{$hs_unit_desc}}"
 HS_UUID="{{$hs_uuid}}"
 HS_SECRET="{{$hs_secret}}"
 HS_ALLOW_ORIGINS="{{$hs_allow_origins}}"
