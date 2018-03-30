@@ -3,4 +3,4 @@ Hotspot
 
 The UI reference is available online at
 
-http://docs.nethserver.org/en/v7/ui/Hotspot.html
+http://docs.nethserver.org/en/v7/ui/Dedalo.html
