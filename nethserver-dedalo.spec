@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.0.0
+Version: 1.0.1
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -34,6 +34,9 @@ rm -rf %{buildroot}
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Tue Apr 03 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.1-1
+- UI improvements
+
 * Fri Mar 30 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.0-1
 - Hotspot: add Dedalo client for Icaro - NethServer/dev#5422
 
