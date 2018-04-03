@@ -56,7 +56,7 @@ class Auth extends \Nethgui\Controller\AbstractController
         $stash->store(json_encode(array( "username" => $username, "password" => $password)));
         $process = $this->getPlatform()->exec('/usr/libexec/nethserver/dedalo-authentication ${@}', array($host, $stash->getFilePath()));
         $result = json_decode($process->getOutput(),TRUE);
-        $loginSuccessful = isset($result['token']);
+        $loginSuccessful = isset($result['token']) && $result['account_type'] == 'reseller';
         if($loginSuccessful) {
             // save the authentication token in the user session DB
             $sessDb = $this->getPlatform()->getDatabase('SESSION');
