@@ -33,6 +33,7 @@ class Register extends \Nethgui\Controller\AbstractController
         $this->declareParameter('Description', Validate::ANYTHING, array('configuration', 'dedalo', 'Description'));
         $this->declareParameter('Id', Validate::NOTEMPTY, array('configuration', 'dedalo', 'Id'));
         $this->declareParameter('Device', Validate::NOTEMPTY, array());
+        $this->declareParameter('NameMap', Validate::NOTEMPTY);
     }
 
     private function listHotspots()
@@ -50,8 +51,9 @@ class Register extends \Nethgui\Controller\AbstractController
         }
         foreach ($hotspots as $hotspot) {
             $ret[] = array($hotspot['id'], $hotspot['name']." (".$hotspot['description'].")");
+            $nameMap[$hotspot['id']] = $hotspot['name'];
         }
-        return $ret;
+        return array($ret,$nameMap);
     }
 
     public function prepareView(\Nethgui\View\ViewInterface $view) {
@@ -62,8 +64,9 @@ class Register extends \Nethgui\Controller\AbstractController
         if($this->getRequest()->isValidated()) {
             $view['IcaroHost'] = $this->getPlatform()->getDatabase('configuration')->getProp('dedalo', 'IcaroHost');
             $view['DeviceDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($this->initNetworkDevicesList($view));
-            $view['IdDatasource'] = $this->listHotspots();
-
+            $list = $this->listHotspots();
+            $view['IdDatasource'] = $list[0];
+            $view['NameMap'] = json_encode($list[1]);
             if( ! $view['UnitName']) {
                 $view['UnitName'] = \gethostname();
             }
@@ -82,6 +85,11 @@ class Register extends \Nethgui\Controller\AbstractController
     protected function onParametersSaved($changes)
     {
         $sessDb = $this->getPlatform()->getDatabase('SESSION');
+
+        $arr = json_decode($this->parameters['NameMap'], 1);
+        $name = $arr[$this->parameters['Id']];
+        $this->getPlatform()->getDatabase('configuration')->setProp('dedalo',array('Name' => $name));
+
         $icaroSessionToken = $sessDb->getType('IcaroSession');
         $stash = new \NethServer\Tool\PasswordStash();
         $stash->store($icaroSessionToken);
