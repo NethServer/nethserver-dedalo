@@ -47,6 +47,7 @@ event_templates($event,
 
 event_actions($event, qw(
     nethserver-dedalo-proxyconfig 20
+    nethserver-dedalo-conf 25
     firewall-adjust 30
 ));
 
