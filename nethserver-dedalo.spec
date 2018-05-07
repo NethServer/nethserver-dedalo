@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -34,6 +34,9 @@ rm -rf %{buildroot}
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Mon May 07 2018 Matteo Valentini <matteo.valentini@nethesis.it> - 1.0.3-1
+- Dedalo: DHCP network doesn't change when modified from web UI - Bug NethServer/dev#5475
+
 * Thu Apr 19 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.2-1
 - Use Hotspot Id instead of Hotspot name in unit registration - Bug Nethesis/icaro#67
 
