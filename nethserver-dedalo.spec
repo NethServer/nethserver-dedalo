@@ -28,6 +28,12 @@ rm -rf %{buildroot}
 (cd root   ; find . -depth -print | cpio -dump %{buildroot})
 %{genfilelist} %{buildroot} > e-smith-%{version}-filelist
 
+%post
+if [ $1 -ge 1 ] ; then
+  if [ $(/sbin/e-smith/config getprop squid status) == "enabled" ]; then
+    /sbin/e-smith/signal-event nethserver-squid-save
+  fi
+fi
 
 %files -f e-smith-%{version}-filelist
 %defattr(-,root,root)
