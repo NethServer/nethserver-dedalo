@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.0.3
+Version: 1.0.4
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -34,6 +34,9 @@ rm -rf %{buildroot}
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Wed May 16 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.4-1
+- Write hotspot proxy logs only on /var/log/squid/dedalo.log - nethserver/dev#5473
+
 * Mon May 07 2018 Matteo Valentini <matteo.valentini@nethesis.it> - 1.0.3-1
 - Dedalo: DHCP network doesn't change when modified from web UI - Bug NethServer/dev#5475
 
