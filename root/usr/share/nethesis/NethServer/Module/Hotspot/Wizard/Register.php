@@ -49,7 +49,7 @@ class Register extends \Nethgui\Controller\AbstractController
             $ret[] = array('',$hotspots['message']);
             return $ret;
         }
-        foreach ($hotspots as $hotspot) {
+        foreach ($hotspots['data'] as $hotspot) {
             $ret[] = array($hotspot['id'], $hotspot['name']." (".$hotspot['description'].")");
             $nameMap[$hotspot['id']] = $hotspot['name'];
         }
