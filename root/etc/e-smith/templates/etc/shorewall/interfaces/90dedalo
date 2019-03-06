@@ -3,3 +3,12 @@
 #
 
 hotsp	tun-dedalo	tcpflags,nosmurfs
+{
+    use esmith::NetworksDB;
+    my $status = $dedalo{'status'} || 'disabled';
+    my $ndb = esmith::NetworksDB->open_ro() || return;
+    my @device= $ndb->get_all_by_prop('role' => 'hotspot');
+    if ( $status eq 'enabled' &&  defined($device[0]) ) {
+        $OUT .= "ethde\t".$device[0]->key."\tdhcp,nosmurfs,routeback\n";
+    }
+}
