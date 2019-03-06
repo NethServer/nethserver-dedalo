@@ -9,7 +9,7 @@
     my @device = $ndb->get_all_by_prop('role' => 'hotspot');
     if ( $status eq 'enabled' &&  defined($device[0]) ) {
         $OUT .= "# Avoid duplicated traffic\n";
-        $OUT .= "DROP\thotsp:".$device[0]->key."\tnet\n";
+        $OUT .= "DROP\tethde\tnet\n";
     }
 
 }

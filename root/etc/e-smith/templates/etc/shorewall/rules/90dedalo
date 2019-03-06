@@ -16,7 +16,7 @@
         $OUT .= 'ACCEPT  hotsp   $FW     udp     67,68'. "\n";
         $OUT .= 'ACCEPT  hotsp   $FW     udp     53'. "\n";
         $OUT .= "# Avoid duplicated traffic\n";
-        $OUT .= "DROP    hotsp:".$device[0]->key."  any\n";
+        $OUT .= "DROP    ethde  any\n";
         $OUT .= 'ACCEPT  hotsp   net'. "\n";
 
         if ($proxy eq 'enabled') {
@@ -25,7 +25,7 @@
             $OUT .= "ACCEPT    hotsp    \$FW    tcp    3132\n";
             $OUT .= "REDIRECT    hotsp    3131    tcp    80\n";
             $OUT .= "REDIRECT    hotsp    3132    tcp    443\n";
-            $OUT .= "?COMMENT";
+            $OUT .= "?COMMENT\n";
         }
         $OUT .= "DROP    hotsp   \$FW\n";
     }
