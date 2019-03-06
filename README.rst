@@ -16,7 +16,7 @@ The whole process is available from the Server Manager, but these are the requir
 1. Set the ``hotspot`` role to the network interface which will be used by Dedalo.
    The interfarce could also be a VLAN. ::
 
-       db networks setprop enps0 role hotspot
+       db networks setprop enps0 role dedalo
 
 2. Configure at least ``IcaroHost`` and the hotspot ``Id``.
    Please note that the hotspot id should be already present inside Icaro installation.

@@ -7,7 +7,7 @@
     my $status = $dedalo{'status'} || 'disabled';
     my $proxy = $dedalo{'Proxy'} || 'disabled';
     my $ndb = esmith::NetworksDB->open_ro() || return;
-    my @device = $ndb->get_all_by_prop('role' => 'hotspot');
+    my @device = $ndb->get_all_by_prop('role' => 'dedalo');
     if ( $status eq 'enabled' &&  defined($device[0]) ) {
         $OUT .= '?COMMENT dedalo'. "\n";
         $OUT .= 'ACCEPT  hotsp   $FW     tcp     3990'. "\n";
@@ -16,7 +16,7 @@
         $OUT .= 'ACCEPT  hotsp   $FW     udp     67,68'. "\n";
         $OUT .= 'ACCEPT  hotsp   $FW     udp     53'. "\n";
         $OUT .= "# Avoid duplicated traffic\n";
-        $OUT .= "DROP    ethde  any\n";
+        $OUT .= "DROP    dedal  any\n";
         $OUT .= 'ACCEPT  hotsp   net'. "\n";
 
         if ($proxy eq 'enabled') {

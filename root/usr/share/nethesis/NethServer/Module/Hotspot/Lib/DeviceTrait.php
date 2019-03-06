@@ -32,7 +32,7 @@ trait DeviceTrait
         $interfaces = $this->getPlatform()->getDatabase('networks')->getAll();
         foreach ($interfaces as $interface => $props) {
             if (preg_match('/ethernet|bridge|bond|alias|ipsec|vlan/',$props['type'])) {
-                if ($props['role'] == 'hotspot') {
+                if ($props['role'] == 'dedalo') {
                     return array($interface);
                 }
             }
@@ -44,11 +44,11 @@ trait DeviceTrait
     {
        $interfaces = $this->getPlatform()->getDatabase('networks')->getAll();
        foreach ($interfaces as $interface => $props) {
-           if ($props['role'] == 'hotspot') {
+           if ($props['role'] == 'dedalo') {
                $this->getPlatform()->getDatabase('networks')->setProp($interface, array('role' => ''));
            }
        }
-       $this->getPlatform()->getDatabase('networks')->setProp($v, array('role' => 'hotspot'));
+       $this->getPlatform()->getDatabase('networks')->setProp($v, array('role' => 'dedalo'));
        return TRUE;
     }
 
@@ -62,7 +62,7 @@ trait DeviceTrait
 
         foreach ($devices as $dev => $val) {
             if (preg_match('/ethernet|bridge|bond|alias|ipsec|vlan/',$val['type'])) {
-                if ($val['role'] == 'hotspot') {
+                if ($val['role'] == 'dedalo') {
                     $networks[$dev] =  $dev. ' - ' . $view->translate('hotspot_assigned_label');
                 }
             }

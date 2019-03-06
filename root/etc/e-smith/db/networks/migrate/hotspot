@@ -1,0 +1,17 @@
+{
+  #
+  # issue XXX - migrate hotspot role to dedalo
+  #
+
+  use esmith::NetworksDB;
+  my $ndb = esmith::NetworksDB->open();
+
+  foreach ($ndb->get_all()) {
+       my $role = $_->prop('role') || next;
+       if ($role eq 'hotspot') {
+           $_->set_prop('role','dedalo');
+       }
+  }
+
+  ''; 
+}

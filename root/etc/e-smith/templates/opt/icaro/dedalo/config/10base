@@ -3,7 +3,7 @@
   use esmith::NetworksDB;
   use NethServer::Password;
   my $ndb = esmith::NetworksDB->open_ro() || return;
-  my @devices = $ndb->get_all_by_prop('role' => 'hotspot');
+  my @devices = $ndb->get_all_by_prop('role' => 'dedalo');
   our $hs_interface = defined($devices[0]) ? $devices[0]->key : '';
   our $hs_network = $dedalo{'Network'} || '';
   my $icaro_host = $dedalo{'IcaroHost'} || '';
