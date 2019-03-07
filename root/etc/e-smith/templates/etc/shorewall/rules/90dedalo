@@ -25,7 +25,7 @@
             $OUT .= "ACCEPT    hotsp    \$FW    tcp    3132\n";
             $OUT .= "REDIRECT    hotsp    3131    tcp    80\n";
             $OUT .= "REDIRECT    hotsp    3132    tcp    443\n";
-            $OUT .= "?COMMENT";
+            $OUT .= "?COMMENT\n";
         }
         $OUT .= "DROP    hotsp   \$FW\n";
     }
