@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.0.6
+Version: 1.0.7
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -36,6 +36,9 @@ rm -rf %{buildroot}
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Thu Mar 07 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.7-1
+- Firewall library: resolve hotspot zone (#15)
+
 * Mon Aug 06 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.6-1
 - Web Proxy  not properly working with nethserver-dedalo - Bug NethServer/dev#5548
 
