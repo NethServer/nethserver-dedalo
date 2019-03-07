@@ -21,6 +21,8 @@ Dedalo capitve portal based on CoovaChilli
 %build
 %{makedocs}
 perl createlinks
+mkdir -p root%{perl_vendorlib}
+mv -v NethServer root%{perl_vendorlib}
 
 
 %install
