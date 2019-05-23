@@ -4,6 +4,7 @@
 
 {
     use esmith::NetworksDB;
+    use NethServer::Firewall;
     my $status = $dedalo{'status'} || 'disabled';
     my $proxy = $dedalo{'Proxy'} || 'disabled';
     my $ndb = esmith::NetworksDB->open_ro() || return;
@@ -20,11 +21,70 @@
         $OUT .= 'ACCEPT  hotsp   net'. "\n";
 
         if ($proxy eq 'enabled') {
+
+            my $fw = new NethServer::Firewall();
+            my $pdb = esmith::ConfigDB->open_ro('fwrules');
+            my $bypass_domain_list = '';
+            foreach ($pdb->get_all_by_prop('type' => 'bypass-dst')) {
+                my $status = $_->prop('status') || 'disabled';
+                next if ($status eq 'disabled');
+                my $domains = $_->prop('Domains') || next;
+                $bypass_domain_list = '+squid-bypass';
+                last;
+            }
+
+            my @bypass_src = ();
+            my $bypass_src_str = '';
+            my @bypass_dst = ();
+            my $bypass_dst_str = '';
+            my @ips;
+            my @interfaces;
+            foreach my $i ($ndb->interfaces) {
+                my $role = $i->prop('role') || '';
+                my $ip = $i->prop('ipaddr') || '';
+                my $bp = $i->prop('bootproto') || '';
+                if ($ip ne '') {
+                    push(@ips,$ip);
+                } else {
+                    if ($role eq 'red' && $bp eq 'dhcp') {
+                        push(@interfaces, "&".$i->key);
+                    }
+                }
+            }
+
+            push(@bypass_dst, @interfaces);
+            push(@bypass_dst, @ips);
+            if ($bypass_domain_list ne '') {
+                push(@bypass_dst, $bypass_domain_list);
+            }
+
+            foreach ($pdb->get_all_by_prop(type => 'bypass-src')) {
+                my $status = $_->prop('status') || 'disabled';
+                next if ($status eq 'disabled');
+                my $host = $_->prop('Host') || next;
+                my $address = $fw->getAddress($host) || next;
+                push(@bypass_src,$address);
+            }
+            foreach ($pdb->get_all_by_prop(type => 'bypass-dst')) {
+                my $status = $_->prop('status') || 'disabled';
+                next if ($status eq 'disabled');
+                my $host = $_->prop('Host') || next;
+                my $address = $fw->getAddress($host) || next;
+                push(@bypass_dst,$address);
+            }
+
+            if (scalar(@bypass_src)>0) {
+                $bypass_src_str = ":!".join(',',@bypass_src);
+            }
+            if (scalar(@bypass_dst)>0) {
+                $bypass_dst_str = "!".join(',',@bypass_dst);
+            }
+
             $OUT .= "\n?COMMENT transparent proxy on hotsp for port 80\n";
             $OUT .= "ACCEPT    hotsp    \$FW    tcp    3131\n";
             $OUT .= "ACCEPT    hotsp    \$FW    tcp    3132\n";
-            $OUT .= "REDIRECT    hotsp    3131    tcp    80\n";
-            $OUT .= "REDIRECT    hotsp    3132    tcp    443\n";
+            $OUT .= "REDIRECT    hotsp$bypass_src_str    3131    tcp    80  -   $bypass_dst_str\n";
+            $OUT .= "REDIRECT    hotsp$bypass_src_str    3132    tcp    443 -   $bypass_dst_str\n";
             $OUT .= "?COMMENT\n";
         }
         $OUT .= "DROP    hotsp   \$FW\n";
