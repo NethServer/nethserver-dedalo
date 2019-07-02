@@ -7,12 +7,13 @@ BuildArch: noarch
 License: GPLv3
 URL: https://github.com/nethesis/icaro
 Source: %{name}-%{version}.tar.gz
+Source1: %{name}-cockpit.tar.gz
 
 BuildRequires: nethserver-devtools
 Requires: nethserver-firewall-base, dedalo
 
 %description
-Dedalo capitve portal based on CoovaChilli
+Dedalo captive portal based on CoovaChilli
 
 %prep
 %setup -q
@@ -28,6 +29,14 @@ mv -v NethServer root%{perl_vendorlib}
 %install
 rm -rf %{buildroot}
 (cd root   ; find . -depth -print | cpio -dump %{buildroot})
+
+mkdir -p %{buildroot}/usr/share/cockpit/%{name}/
+mkdir -p %{buildroot}/usr/share/cockpit/nethserver/applications/
+mkdir -p %{buildroot}/usr/libexec/nethserver/api/%{name}/
+tar xvf %{SOURCE1} -C %{buildroot}/usr/share/cockpit/%{name}/
+cp -a %{name}.json %{buildroot}/usr/share/cockpit/nethserver/applications/
+cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
+
 %{genfilelist} %{buildroot} > e-smith-%{version}-filelist
 
 

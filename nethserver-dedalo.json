@@ -1,0 +1,23 @@
+{
+    "id": "nethserver-dedalo",
+    "name": "Hotspot unit",
+    "summary": "Nethserver Hotspot management using Icaro",
+    "description": "Nethserver Hotspot management using Icaro",
+    "url": "",
+    "homepage": "https://github.com/NethServer/nethserver-dedalo",
+    "provides": ["nethserver-dedalo"],
+    "release": {
+        "version": "1.0.0"
+    },
+    "tags": ["hotspot", "icaro", "nethserver"],
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/NethServer/dev/issues"
+    },
+    "author": {
+        "name": "Andrea Leardini",
+        "url": "https://github.com/NethServer/nethserver-dedalo",
+        "email": "andrea.leardini@nethesis.it"
+    },
+    "icon": "icon.png"
+}
