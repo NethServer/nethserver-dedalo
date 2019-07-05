@@ -1,0 +1,99 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2019 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import subprocess
+import simplejson
+import tempfile
+import socket
+
+def read_network_devices():
+    bash_command = "/sbin/e-smith/db networks getjson"
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    db_networks = simplejson.loads(output)
+    device_types = [ "ethernet", "bridge", "bond", "alias", "ipsec", "vlan" ]
+    network_devices = []
+
+    for elem in db_networks:
+        if elem["type"] in device_types:
+            # return only devices with role "hotspot" or empty
+            if elem["props"]["role"] == "hotspot" or (not elem["props"]["role"]):
+                name = elem["name"]
+
+                if elem["props"]["role"] == "hotspot":
+                    hotspot_assigned = True
+                else:
+                    hotspot_assigned = False
+                
+                network_device = { "name": name, "hotspot_assigned": hotspot_assigned }
+                network_devices.append(network_device)
+    
+    return network_devices
+
+def read_hotspots(token, hostname):
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(token)
+        tmp_file.flush()
+
+        # launch command
+        bash_command = "/usr/libexec/nethserver/dedalo-hotspot-list %s %s" % (hostname, tmp_file.name)
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
+        if not output:
+            return { "message": "Error retrieving hotspot list" }
+        else:
+            outputJson = simplejson.loads(output)
+
+            if "message" in outputJson:
+                # an error has occured
+                return outputJson
+            else:
+                return { "hotspots": outputJson }
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    app_info = input_json["appInfo"]
+
+    if app_info == 'hotspots':
+        token = input_json["token"]
+        hostname = input_json["hostname"]
+        hotspots = read_hotspots(token, hostname)
+        output = simplejson.dumps(hotspots)
+        print (output)
+
+        # if output json contains a message object, return exit code 1
+        if 'message' in hotspots:
+            sys.exit(1)
+    elif app_info == 'networkDevices':
+        network_devices = read_network_devices()
+        output = simplejson.dumps({'networkDevices': network_devices})
+        print (output)
+    elif app_info == 'hostname':
+        output = simplejson.dumps({'hostname': socket.gethostname()})
+        print (output)
+except Exception, e:
+    print simplejson.dumps({ 'error': "%s" % e })
+    sys.exit(1)

@@ -1,10 +1,203 @@
 <template>
   <div>
     <h1>{{$t('settings.title')}}</h1>
-    <div v-if="!configLoaded" class="spinner spinner-lg"></div>
-    <div v-if="configLoaded">
-      <form class="form-horizontal" v-on:submit.prevent="btSaveClick">
-      </form>
+    
+    <!-- error message -->
+    <div v-if="errorMessage" class="alert alert-danger alert-dismissable">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span class="pficon pficon-close"></span>
+      </button>
+      <span class="pficon pficon-error-circle-o"></span>
+      {{ errorMessage }}.
+    </div>
+
+    <div v-if="!uiLoaded" class="spinner spinner-lg"></div>
+    <div v-if="uiLoaded">
+      <!-- authentication form -->
+      <div v-if="!authenticated">
+        <form class="form-horizontal" v-on:submit.prevent="btAuthenticateClick">
+          <!-- hostname -->
+          <div class="form-group" :class="{ 'has-error': showErrorHostname }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.hostname')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.IcaroHost" required>
+              <span class="help-block" v-if="showErrorHostname">{{$t('settings.hostname_validation')}}</span>
+            </div>
+          </div>
+          <!-- username -->
+          <div class="form-group" :class="{ 'has-error': showErrorUsername }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.username')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="username" required>
+              <span class="help-block" v-if="showErrorUsername">{{$t('settings.username_validation')}}</span>
+            </div>
+          </div>
+          <!-- password -->
+          <div class="form-group" :class="{ 'has-error': showErrorPassword }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.password')}}</label>
+            <div class="col-sm-5">
+              <input
+                :type="passwordVisible ? 'text' : 'password'"
+                class="form-control"
+                v-model="password"
+                required
+              >
+              <span class="help-block" v-if="showErrorPassword">{{$t('settings.password_validation')}}</span>
+            </div>
+            <!-- toggle password visibility -->
+            <div class="col-sm-2 adjust-index">
+              <button
+                tabindex="-1"
+                type="button"
+                class="btn btn-primary"
+                @click="togglePasswordVisibility()"
+              >
+                <span :class="[!passwordVisible ? 'fa fa-eye' : 'fa fa-eye-slash']"></span>
+              </button>
+            </div>
+          </div>
+          <!-- authenticate button -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+            <div class="col-sm-5">
+              <button class="btn btn-primary" type="submit">{{$t('settings.authenticate')}}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- registration form -->
+      <div v-if="authenticated && !registered">
+        <form class="form-horizontal" v-on:submit.prevent="btRegisterClick">
+          <!-- hotspot -->
+          <div class="form-group" :class="{ 'has-error': showErrorHotspot }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.parent_hotspot')}}</label>
+            <div class="col-sm-5">
+              <select required type="text" class="combobox form-control" v-model="selectedHotspotIndex">
+                <option
+                  v-for="(hotspot, index) in hotspotList"
+                  v-bind:key="index"
+                  :value="index"
+                >{{ hotspot.name }} ({{ hotspot.description }})</option>
+              </select>
+              <span class="help-block" v-if="showErrorHotspot">{{$t('settings.hotspot_validation')}}</span>
+            </div>
+          </div>
+          <!-- unit name -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.unit_name')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.UnitName" required disabled>
+            </div>
+          </div>
+          <!-- unit description -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.unit_description')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.Description">
+            </div>
+          </div>
+          <!-- network device -->
+          <div class="form-group" :class="{ 'has-error': showErrorNetworkDevice }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.network_device')}}</label>
+            <div class="col-sm-5">
+              <select required type="text" class="combobox form-control" v-model="networkDevice">
+                <option
+                  v-for="(networkDevice, index) in networkDeviceList"
+                  v-bind:key="index"
+                  :value="networkDevice.name"
+                >{{ networkDevice.name + (networkDevice.hotspot_assigned ? (" - " + $t('settings.hotspot_assigned')) : "") }}</option>
+              </select>
+              <span class="help-block" v-if="showErrorNetworkDevice">{{$t('settings.network_device_validation')}}</span>
+            </div>
+          </div>
+          <!-- register button -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+            <div class="col-sm-5">
+              <button class="btn btn-primary" type="submit">{{$t('settings.register')}}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- registration completed form -->
+      <div v-if="authenticated && registered">
+        <form class="form-horizontal" v-on:submit.prevent="btSaveClick">
+          <!-- hotspot -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.parent_hotspot')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="hotspotList[selectedHotspotIndex].name" required disabled>
+            </div>
+          </div>
+          <!-- network device -->
+          <div class="form-group" :class="{ 'has-error': showErrorNetworkDevice }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.network_device')}}</label>
+            <div class="col-sm-5">
+              <select required type="text" class="combobox form-control" v-model="networkDevice">
+                <option
+                  v-for="(networkDevice, index) in networkDeviceList"
+                  v-bind:key="index"
+                  :value="networkDevice.name"
+                >{{ networkDevice.name + (networkDevice.hotspot_assigned ? (" - " + $t('settings.hotspot_assigned')) : "") }}</option>
+              </select>
+              <span class="help-block" v-if="showErrorNetworkDevice">{{$t('settings.network_device_validation')}}</span>
+            </div>
+          </div>
+          <!-- network address -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.network_address')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.Network">
+            </div>
+          </div>
+          <!-- save button -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+            <div class="col-sm-5">
+              <button class="btn btn-primary" type="submit">{{$t('settings.save')}}</button>
+            </div>
+          </div>
+          <!-- unregister button -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+            <div class="col-sm-5">
+              <button class="btn btn-primary" type="button" @click="btUnregisterClick()">{{$t('settings.unregister')}}</button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -13,13 +206,354 @@
 export default {
   name: "Settings",
   mounted() {
+    this.getToken()
   },
   data() {
     return {
-      configLoaded: false,
+      uiLoaded: false,
+      username: "",
+      password: "",
+      passwordVisible: false,
+      dedaloConfig: null,
+      authenticated: false,
+      registered: false,
+      showErrorHostname: false,
+      showErrorUsername: false,
+      showErrorPassword: false,
+      selectedHotspotIndex: 0,
+      hotspotList: [],
+      networkDevice: "",
+      networkDeviceList: [],
+      accountType: "",
+      token: "",
+      showErrorHotspot: false,
+      showErrorNetworkDevice: false,
+      errorMessage: null
     }
   },
   methods: {
+    getToken() {
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/authentication/read"],
+        { "appInfo": "token" },
+        null,
+        function(success) {
+          var tokenOutput = JSON.parse(success);
+          ctx.tokenSuccess(tokenOutput)
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_token_from_file"), error)
+        }
+      );
+    },
+    tokenSuccess(tokenOutput) {
+      this.token = tokenOutput.token;
+
+      if (this.token) {
+        this.authenticated = true
+      } else {
+        this.authenticated = false
+      }
+      this.getConfig()
+    },
+    getConfig() {
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/authentication/read"],
+        { "appInfo": "configuration" },
+        null,
+        function(success) {
+          success = JSON.parse(success);
+          ctx.dedaloConfig = success.configuration.props;
+
+          if (ctx.token) {
+            ctx.authenticationSuccess()
+          } else {
+            ctx.uiLoaded = true
+          }
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_reading_configuration"), error)
+        }
+      );
+    },
+    showErrorMessage(errorMessage, error) {
+      console.error(errorMessage, error) /* eslint-disable-line no-console */
+      this.errorMessage = errorMessage
+    },
+    togglePasswordVisibility() {
+      this.passwordVisible = !this.passwordVisible;
+    },
+    btAuthenticateClick() {
+      this.showErrorHostname = false;
+      this.showErrorUsername = false;
+      this.showErrorPassword = false;
+      this.errorMessage = null;
+
+      var authObj = {
+        "action": "authenticate",
+        "hostname": this.dedaloConfig.IcaroHost,
+        "username": this.username,
+        "password": this.password
+      }
+      var ctx = this;      
+      nethserver.exec(
+        ["nethserver-dedalo/settings/authentication/validate"],
+        authObj,
+        null,
+        function(success) {
+          ctx.authenticationValidationSuccess(authObj)
+        },
+        function(error, data) {
+          ctx.authenticationValidationError(error, data)
+        }
+      );
+    },
+    authenticationValidationSuccess(authObj) {
+      var ctx = this
+      // execute authentication
+      nethserver.exec(
+        ["nethserver-dedalo/settings/authentication/execute"],
+        authObj,
+        null,
+        function(authOutput) {
+          authOutput = JSON.parse(authOutput);
+          
+          if (!authOutput.token) {
+            ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_authentication_token"))
+            return
+          }
+
+          if (authOutput.account_type != "reseller") {
+            ctx.showErrorMessage(ctx.$i18n.t("settings.account_type_expected_reseller") + " " + authOutput.account_type)
+            return
+          }
+          ctx.token = authOutput.token
+          ctx.saveTokenToFile()
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.authentication_error"), error)
+        }
+      );
+    },
+    saveTokenToFile() {
+      var saveTokenObj = {
+        "action": "saveToken",
+        "hostname": this.dedaloConfig.IcaroHost,
+        "token": this.token
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/authentication/execute"],
+        saveTokenObj,
+        null,
+        function(success) {
+          ctx.authenticationSuccess()
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_saving_token_to_file"), error)
+        }
+      );
+    },
+    authenticationSuccess() {
+      this.uiLoaded = false;
+      // retrieve hotspot list
+      var jsonObj = {
+        "appInfo": "hotspots",
+        "hostname": this.dedaloConfig.IcaroHost,
+        "token": this.token
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/read"],
+        jsonObj,
+        null,
+        function(success) {
+          var hotspotsOutput = JSON.parse(success);
+          ctx.readHotspotsSuccess(hotspotsOutput)
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_hotspot_list"), error)
+        }
+      );
+    },
+    authenticationValidationError(error, data) {
+      var errorData = JSON.parse(data);
+
+      for (var e in errorData.attributes) {
+        var attr = errorData.attributes[e]
+        var param = attr.parameter;
+
+        if (param === 'hostname') {
+          this.showErrorHostname = true;
+        } else if (param === 'username') {
+          this.showErrorUsername = true;
+        } else if (param === 'password') {
+          this.showErrorPassword = true;
+        }
+      }
+    },
+    readHotspotsSuccess(hotspotsOutput) {
+      this.authenticated = true
+      this.registered = false
+      var hotspots = hotspotsOutput.hotspots.data
+      this.hotspotList = []
+      var hotspot
+
+      for (hotspot of hotspots) {
+        this.hotspotList.push(hotspot)
+      }
+
+      // select the first hotspot by default
+      this.selectedHotspotIndex = 0
+
+      // retrieve network devices
+      var jsonObj = {
+        "appInfo": "networkDevices"
+      }
+      var ctx = this
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/read"],
+        jsonObj,
+        null,
+        function(success) {
+          var networkDevicesOutput = JSON.parse(success);
+          ctx.readNetworkDevicesSuccess(networkDevicesOutput)
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_network_devices"), error)
+        }
+      );
+    },
+    readNetworkDevicesSuccess(networkDevicesOutput) {
+      var networkDevices = networkDevicesOutput.networkDevices
+      this.networkDeviceList = []
+      var networkDevice
+
+      for (networkDevice of networkDevices) {
+        this.networkDeviceList.push(networkDevice)
+      }
+      // select the first network device by default
+      this.networkDevice = this.networkDeviceList[0].name
+
+      if (this.dedaloConfig.UnitName) {
+        this.uiLoaded = true
+      } else {
+        // retrieve hostname and assign it to UnitName
+        var jsonObj = {
+          "appInfo": "hostname"
+        }
+        var ctx = this;
+        nethserver.exec(
+          ["nethserver-dedalo/settings/registration/read"],
+          jsonObj,
+          null,
+          function(success) {
+            var hostnameOutput = JSON.parse(success);
+            ctx.dedaloConfig.UnitName = hostnameOutput.hostname
+            ctx.uiLoaded = true
+          },
+          function(error, data) {
+            ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_hostname"), error)
+          }
+        );
+      }
+    },
+    btRegisterClick() {
+      this.showErrorHotspot = false;
+      this.showErrorUnitDescription = false;
+      this.showErrorNetworkDevice = false;
+
+      var registerObjValidate = {
+        "hotspotId": this.hotspotList[this.selectedHotspotIndex].id,
+        "unitDescription": this.dedaloConfig.Description,
+        "networkDevice": this.networkDevice
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/validate"],
+        registerObjValidate,
+        null,
+        function(success) {
+          ctx.registrationValidationSuccess(registerObjValidate)
+        },
+        function(error, data) {
+          ctx.registrationValidationError(error, data)
+        }
+      );
+    },
+    registrationValidationError(error, data) {
+      var errorData = JSON.parse(data);
+
+      for (var e in errorData.attributes) {
+        var attr = errorData.attributes[e]
+        var param = attr.parameter;
+
+        if (param === 'hotspot') {
+          this.showErrorHotspot = true;
+        } else if (param === 'unitDescription') {
+          this.showErrorUnitDescription = true;
+        } else if (param === 'networkDevice') {
+          this.showErrorNetworkDevice = true;
+        }
+      }
+    },
+    registrationValidationSuccess(registerObjValidate) {
+      nethserver.notifications.success = this.$i18n.t("settings.registration_successful");
+      nethserver.notifications.error = this.$i18n.t("settings.registration_failed");
+
+      var registerObjExecute = {
+        "hotspotId": registerObjValidate.hotspotId,
+        "hotspotName": this.hotspotList[this.selectedHotspotIndex].name,
+        "unitDescription": registerObjValidate.unitDescription,
+        "networkDevice": registerObjValidate.networkDevice,
+        "hostname": this.dedaloConfig.IcaroHost,
+        "unitName": this.dedaloConfig.UnitName
+      }
+      var ctx = this
+
+      // execute registration
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/execute"],
+        registerObjExecute,
+        function(stream) {
+          console.info("dedalo-register", stream); /* eslint-disable-line no-console */
+        },
+        function(success) {
+          ctx.registered = true
+        },
+        function(error) {
+          console.error(error)  /* eslint-disable-line no-console */
+        }
+      );
+    },
+    btSaveClick() {
+      // save configuration
+      nethserver.notifications.success = this.$i18n.t("settings.configuration_update_successful");
+      nethserver.notifications.error = this.$i18n.t("settings.configuration_update_failed");
+
+      var jsonObj = {
+        "network": this.dedaloConfig.Network
+      }
+      var ctx = this
+      nethserver.exec(
+        ["nethserver-dedalo/settings/configuration/update"],
+        jsonObj,
+        function(stream) {
+          console.info("dedalo-configuration-update", stream); /* eslint-disable-line no-console */
+        },
+        function(success) {
+          // todo
+        },
+        function(error) {
+          console.error(error)  /* eslint-disable-line no-console */
+        }
+      );
+    },
+    btUnregisterClick() {
+      // todo aaa
+    }
   }
 };
 </script>

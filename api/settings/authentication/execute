@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2019 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+. /usr/libexec/nethserver/api/lib/helper_functions
+
+function _get
+{
+    field=$1
+    echo $data | jq -r ".$field"
+}
+
+function authenticate {
+    hostname=$(_get hostname)
+    username=$(_get username)
+    password=$(_get password)
+    tempfile=$(mktemp)
+    echo -n "{\"username\":\"$username\",\"password\":\"$password\"}" > $tempfile
+
+    auth_output=$(/usr/libexec/nethserver/dedalo-authentication "$hostname" "$tempfile")
+
+    # in some cases dedalo-authentication produces no output (e.g. invalid hostname)
+    if [ -z "$auth_output" ]
+    then
+        auth_output="{\"message\":\"Authentication error\"}"
+    fi
+
+    echo -n $auth_output
+
+    # if auth_output json contains message object, an error has occured
+    if [[ $auth_output == *"message"* ]]; then
+        exit 1
+    fi
+}
+
+function save_token_to_file {
+    hostname=$(_get hostname)
+    token=$(_get token)
+    token_file=~/.dedalo-token
+    echo -n "{\"hostname\":\"$hostname\",\"token\":\"$token\"}" > $token_file
+    chmod 600 $token_file
+
+    # set IcaroHost in configuration
+    /sbin/e-smith/config setprop dedalo IcaroHost "$hostname"
+}
+
+data=$(cat /dev/stdin)
+action=$(_get action)
+
+if [ "$action" = "authenticate" ];
+then
+    authenticate
+elif [ "$action" = "saveToken" ];
+then
+    save_token_to_file
+fi
