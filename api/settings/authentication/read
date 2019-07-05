@@ -1,0 +1,94 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2019 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import subprocess
+import simplejson
+import fileinput
+import os
+import tempfile
+
+def read_token():
+    home_directory = os.getenv("HOME")
+    token_file = home_directory + "/.dedalo-token"
+
+    if os.path.isfile(token_file):
+        with open(token_file) as f:
+            read_data = f.read()
+            token_json = simplejson.loads(read_data)
+            token = token_json["token"]
+            hostname = token_json["hostname"]
+            is_token_ok = verify_token(token, hostname)
+
+            if is_token_ok:
+                return token
+            else:
+                # token has expired
+                return ''
+    else:
+        # token file doesn't exist
+        return ''
+
+def verify_token(token, hostname):
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(token)
+        tmp_file.flush()
+
+        # fetch hotspot list to verify token hasn't expired
+        bash_command = "/usr/libexec/nethserver/dedalo-hotspot-list %s %s" % (hostname, tmp_file.name)
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
+        if not output:
+            return False
+        else:
+            outputJson = simplejson.loads(output)
+
+            if "message" in outputJson:
+                # an error has occured
+                return False
+            else:
+                return True
+
+def read_config(config_name):
+    bash_command = "/sbin/e-smith/config getjson %s" % config_name
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    config_json = simplejson.loads(output)
+    return config_json
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    app_info = input_json["appInfo"]
+
+    if app_info == 'token':
+        token = read_token()
+        output = simplejson.dumps({'token': token})
+        print (output)
+    elif app_info == 'configuration':
+        dedalo_config = read_config('dedalo')
+        output = simplejson.dumps({'configuration': dedalo_config})
+        print (output)
+except Exception, e:
+    print simplejson.dumps({ 'error': "%s" % e })
+    sys.exit(1)
