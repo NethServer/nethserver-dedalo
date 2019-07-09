@@ -173,30 +173,95 @@
             </div>
           </div>
           <!-- network address -->
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': showErrorNetworkAddress }">
             <label
               class="col-sm-2 control-label"
               for="textInput-modal-markup"
             >{{$t('settings.network_address')}}</label>
             <div class="col-sm-5">
               <input type="input" class="form-control" v-model="dedaloConfig.Network">
+              <span class="help-block" v-if="showErrorNetworkAddress">{{$t('settings.network_address_validation')}}</span>
+            </div>
+          </div>
+          <!-- proxy -->
+          <div class="form-group" :class="{ 'has-error': showErrorProxy }" v-if="proxyStatus === 'enabled'">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.enable_transparent_proxy_on_hotspot')}}</label>
+            <div class="col-sm-5">
+              <toggle-button
+                class="min-toggle"
+                :width="40"
+                :height="20"
+                :color="{checked: '#0088ce', unchecked: '#bbbbbb'}"
+                :value="dedaloConfig.Proxy === 'enabled'"
+                :sync="true"
+                @change="toggleProxy()"
+              />
+              <span class="help-block" v-if="showErrorProxy">{{$t('settings.proxy_validation')}}</span>
+            </div>
+          </div>
+          <!-- proxy - log traffic -->
+          <div class="form-group" v-if="dedaloConfig.Proxy === 'enabled' && proxyStatus === 'enabled'" :class="{ 'has-error': showErrorLogTraffic }">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.log_traffic')}}</label>
+            <div class="col-sm-5">
+              <toggle-button
+                class="min-toggle"
+                :width="40"
+                :height="20"
+                :color="{checked: '#0088ce', unchecked: '#bbbbbb'}"
+                :value="dedaloConfig.LogTraffic === 'enabled'"
+                :sync="true"
+                @change="toggleLogTraffic()"
+              />
+              <span class="help-block" v-if="showErrorLogTraffic">{{$t('settings.log_traffic_validation')}}</span>
             </div>
           </div>
           <!-- save button -->
           <div class="form-group">
             <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
             <div class="col-sm-5">
-              <button class="btn btn-primary" type="submit">{{$t('settings.save')}}</button>
+              <button class="btn btn-primary" type="submit">{{$t('save')}}</button>
             </div>
           </div>
+
+          <div class="divider"></div>
+
           <!-- unregister button -->
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+          <div class="form-group margin-top-20">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.unregister_hotspot')}}
+            </label>
             <div class="col-sm-5">
-              <button class="btn btn-primary" type="button" @click="btUnregisterClick()">{{$t('settings.unregister')}}</button>
+              <button class="btn btn-danger" type="button" @click="btUnregisterClick()">{{$t('settings.unregister')}}</button>
             </div>
           </div>
         </form>
+      </div>
+
+      <div class="modal" id="unregisterModal" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{$t('settings.release_hotspot_role_and_unregister')}}</h4>
+            </div>
+            <form class="form-horizontal" v-on:submit.prevent="unregister()">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="textInput-modal-markup">{{$t('are_you_sure')}}?</label>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-default" type="button" data-dismiss="modal">{{$t('cancel')}}</button>
+                <button class="btn btn-danger" type="submit">{{$t('settings.unregister')}}</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -228,7 +293,11 @@ export default {
       token: "",
       showErrorHotspot: false,
       showErrorNetworkDevice: false,
-      errorMessage: null
+      showErrorNetworkAddress: false,
+      showErrorProxy: false,
+      showErrorLogTraffic: false,
+      errorMessage: null,
+      proxyStatus: ""
     }
   },
   methods: {
@@ -357,6 +426,7 @@ export default {
       );
     },
     authenticationSuccess() {
+      this.authenticated = true
       this.uiLoaded = false;
       // retrieve hotspot list
       var jsonObj = {
@@ -395,18 +465,7 @@ export default {
       }
     },
     readHotspotsSuccess(hotspotsOutput) {
-      this.authenticated = true
-      this.registered = false
-      var hotspots = hotspotsOutput.hotspots.data
-      this.hotspotList = []
-      var hotspot
-
-      for (hotspot of hotspots) {
-        this.hotspotList.push(hotspot)
-      }
-
-      // select the first hotspot by default
-      this.selectedHotspotIndex = 0
+      this.hotspotsLoaded(hotspotsOutput)
 
       // retrieve network devices
       var jsonObj = {
@@ -427,19 +486,9 @@ export default {
       );
     },
     readNetworkDevicesSuccess(networkDevicesOutput) {
-      var networkDevices = networkDevicesOutput.networkDevices
-      this.networkDeviceList = []
-      var networkDevice
+      this.networkDevicesLoaded(networkDevicesOutput)
 
-      for (networkDevice of networkDevices) {
-        this.networkDeviceList.push(networkDevice)
-      }
-      // select the first network device by default
-      this.networkDevice = this.networkDeviceList[0].name
-
-      if (this.dedaloConfig.UnitName) {
-        this.uiLoaded = true
-      } else {
+      if (!this.dedaloConfig.UnitName) {
         // retrieve hostname and assign it to UnitName
         var jsonObj = {
           "appInfo": "hostname"
@@ -459,6 +508,11 @@ export default {
           }
         );
       }
+
+      if (this.dedaloConfig.Id) {
+        this.registrationSuccess()
+      }
+      this.uiLoaded = true
     },
     btRegisterClick() {
       this.showErrorHotspot = false;
@@ -500,10 +554,12 @@ export default {
       }
     },
     registrationValidationSuccess(registerObjValidate) {
+      this.uiLoaded = false
       nethserver.notifications.success = this.$i18n.t("settings.registration_successful");
       nethserver.notifications.error = this.$i18n.t("settings.registration_failed");
 
       var registerObjExecute = {
+        "action": "register",
         "hotspotId": registerObjValidate.hotspotId,
         "hotspotName": this.hotspotList[this.selectedHotspotIndex].name,
         "unitDescription": registerObjValidate.unitDescription,
@@ -521,42 +577,175 @@ export default {
           console.info("dedalo-register", stream); /* eslint-disable-line no-console */
         },
         function(success) {
-          ctx.registered = true
+          ctx.registrationSuccess()
         },
         function(error) {
           console.error(error)  /* eslint-disable-line no-console */
+        }
+      );
+    },
+    registrationSuccess() {
+      this.registered = true
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/configuration/read"],
+        {},
+        null,
+        function(success) {
+          var proxyStatusOutput = JSON.parse(success);
+          ctx.proxyStatus = proxyStatusOutput.proxyStatus
+          ctx.uiLoaded = true
+        },
+        function(error, data) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_proxy_status"), error)
         }
       );
     },
     btSaveClick() {
-      // save configuration
+      // validation
+      this.showErrorNetworkDevice = false;
+      this.showErrorNetworkAddress = false;
+      this.showErrorProxy = false;
+      this.showErrorLogTraffic = false;
+
+      var configObjValidate = {
+        "network": this.dedaloConfig.Network,
+        "proxy": this.dedaloConfig.Proxy,
+        "logTraffic": this.dedaloConfig.LogTraffic,
+        "device": this.networkDevice
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/configuration/validate"],
+        configObjValidate,
+        null,
+        function(success) {
+          ctx.configurationValidationSuccess(configObjValidate)
+        },
+        function(error, data) {
+          ctx.configurationValidationError(error, data)
+        }
+      );
+    },
+    configurationValidationSuccess(configObjValidate) {
       nethserver.notifications.success = this.$i18n.t("settings.configuration_update_successful");
       nethserver.notifications.error = this.$i18n.t("settings.configuration_update_failed");
 
-      var jsonObj = {
-        "network": this.dedaloConfig.Network
-      }
       var ctx = this
       nethserver.exec(
         ["nethserver-dedalo/settings/configuration/update"],
-        jsonObj,
+        configObjValidate,
         function(stream) {
           console.info("dedalo-configuration-update", stream); /* eslint-disable-line no-console */
         },
         function(success) {
-          // todo
+          ctx.getConfig()
         },
         function(error) {
           console.error(error)  /* eslint-disable-line no-console */
         }
       );
     },
+    configurationValidationError(error, data) {
+      var errorData = JSON.parse(data);
+
+      for (var e in errorData.attributes) {
+        var attr = errorData.attributes[e]
+        var param = attr.parameter;
+
+        if (param === 'network') {
+          this.showErrorNetworkAddress = true;
+        } else if (param === 'proxy') {
+          this.showErrorProxy = true;
+        } else if (param === 'logTraffic') {
+          this.showErrorLogTraffic = true;
+        } else if (param === 'device') {
+          this.showErrorNetworkDevice = true;
+        }
+      }
+    },
     btUnregisterClick() {
-      // todo aaa
+      $("#unregisterModal").modal("show");
+    },
+    unregister() {
+      $("#unregisterModal").modal("hide");
+      this.uiLoaded = false
+      nethserver.notifications.success = this.$i18n.t("settings.unregister_successful");
+      nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
+
+      var unregisterObj = {
+        "action": "unregister"
+      }
+      var ctx = this
+
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/execute"],
+        unregisterObj,
+        function(stream) {
+          console.info("dedalo-unregister", stream); /* eslint-disable-line no-console */
+        },
+        function(success) {
+          ctx.unregisterSuccess()
+        },
+        function(error) {
+          console.error(error)  /* eslint-disable-line no-console */
+        }
+      );
+    },
+    unregisterSuccess() {
+      this.registered = false
+      this.uiLoaded = true
+    },
+    networkDevicesLoaded(networkDevicesOutput) {
+      var networkDevices = networkDevicesOutput.networkDevices
+      this.networkDeviceList = []
+      var networkDevice
+      var foundHotspotDevice = false
+
+      for (networkDevice of networkDevices) {
+        this.networkDeviceList.push(networkDevice)
+
+        if (networkDevice.hotspot_assigned) {
+          this.networkDevice = networkDevice.name
+          foundHotspotDevice = true
+        }
+      }
+      
+      if (!foundHotspotDevice) {
+        this.networkDevice = this.networkDeviceList[0].name
+      }
+    },
+    hotspotsLoaded(hotspotsOutput) {
+      var hotspots = hotspotsOutput.hotspots.data
+      this.hotspotList = []
+      var hotspot
+
+      for (hotspot of hotspots) {
+        this.hotspotList.push(hotspot)
+      }
+      // select the first hotspot by default
+      this.selectedHotspotIndex = 0
+    },
+    toggleProxy() {
+      if (this.dedaloConfig.Proxy === "enabled") {
+        this.dedaloConfig.Proxy = "disabled"
+      } else {
+        this.dedaloConfig.Proxy = "enabled"
+      }
+    },
+    toggleLogTraffic() {
+      if (this.dedaloConfig.LogTraffic === "enabled") {
+        this.dedaloConfig.LogTraffic = "disabled"
+      } else {
+        this.dedaloConfig.LogTraffic = "enabled"
+      }
     }
   }
 };
 </script>
 
 <style scoped>
+.margin-top-20 {
+  margin-top: 20px
+}
 </style>

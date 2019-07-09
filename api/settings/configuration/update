@@ -1,0 +1,92 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2019 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import subprocess
+import simplejson
+import shlex
+
+def update(input_json):
+    network = input_json['network']
+    proxy = input_json['proxy']
+    log_traffic = input_json['logTraffic']
+    device = input_json['device']
+
+    try:
+        bash_command = "/sbin/e-smith/config setprop dedalo Network %s Proxy %s LogTraffic %s" % (network, proxy, log_traffic)
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Error setting props: %s" % e
+
+    # release hotspot role for all devices
+    try:
+        bash_command = "/sbin/e-smith/db networks getjson"
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Error retrieving db networks: %s" % e
+
+    networks_json = simplejson.loads(output)
+    hotspot_networks_to_reset = []
+
+    for network in networks_json:
+        if network['props']['role'] == 'hotspot':
+            hotspot_networks_to_reset.append(network['name'])
+
+    for network in hotspot_networks_to_reset:
+        try:
+            bash_command = "/sbin/e-smith/db 'networks' 'setprop' '%s' 'role' '' " % network
+            process = subprocess.Popen(shlex.split(bash_command), stdout=subprocess.PIPE)
+            output, error = process.communicate()
+        except Exception, e:
+            return "Error releasing hotspot role for network %s: %s" % (network, e)
+
+    # set hotspot role for the selected device
+    try:
+        bash_command = "/sbin/e-smith/db networks setprop %s role hotspot" % device
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Error setting hotspot role for network %s: %s" % (network, e)
+
+    # nethserver-dedalo-save
+    try:
+        bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-save"
+        process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Event failed, see /var/log/messages: %s" % e
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    error = update(input_json)
+    if error:
+        output = simplejson.dumps({'state': 'error', 'message': error})
+    else:
+        output = simplejson.dumps({'state': 'success'})
+    print (output)
+except Exception, e:
+    print simplejson.dumps({ 'error': "%s" % e })
+    sys.exit(1)

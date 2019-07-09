@@ -20,7 +20,18 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-set -e 
+set -e
 
 # Enable dedalo service
 /sbin/e-smith/config setprop dedalo status disabled Id ''
+
+# retrieve internal unit ID
+dedalo_config=$(/sbin/e-smith/config getjson dedalo)
+icaro_host=$(echo $dedalo_config | jq -r ".props.IcaroHost")
+uuid=$(echo $dedalo_config | jq -r ".props.Uuid")
+token=$(cat ~/.dedalo-token | jq -r ".token")
+unit_data=$(curl -X GET --url https://$icaro_host/api/units?q=$uuid --header "Token: $token" --header "Content-Type: application/json" -s)
+id=$(echo $unit_data | jq -r ".data | .[0].id")
+
+# unregister unit
+curl -X DELETE --url https://$icaro_host/api/units/$id --header "Token: $token" --header "Content-Type: application/json" -s
