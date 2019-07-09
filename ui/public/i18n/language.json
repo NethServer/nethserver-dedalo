@@ -29,10 +29,19 @@
         "registration_failed": "Registration failed",
         "error_retrieving_hostname": "Error retrieving hostname",
         "network_address": "Network address",
-        "save": "Save",
         "unregister": "Unregister",
         "configuration_update_successful": "Configuration update successful",
-        "configuration_update_failed": "Configuration update failed"
+        "configuration_update_failed": "Configuration update failed",
+        "unregister_successful": "Unregister successful",
+        "unregister_failed": "Unregister failed",
+        "enable_transparent_proxy_on_hotspot": "Enable transparent proxy on hotspot",
+        "log_traffic": "Log traffic",
+        "release_hotspot_role_and_unregister": "Release hotspot role and unregister",
+        "unregister_hotspot": "Unregister hotspot",
+        "network_address_validation": "Network address must use a valid CIDR notation",
+        "proxy_validation": "Proxy must be 'enabled' or 'disabled'",
+        "log_traffic_validation": "Log traffic must be 'enabled' or 'disabled'",
+        "error_retrieving_proxy_status": "Error retrieving proxy status"
     },
     "about": {
         "title": "About",
@@ -48,6 +57,9 @@
         "filter_label": "Regexp filter"
     },
     "dashboard":{
-        "title": "Hotspot dashboard"
-    }
+        "title": "Hotspot"
+    },
+    "are_you_sure": "Are you sure",
+    "save": "Save",
+    "cancel": "Cancel"
 }

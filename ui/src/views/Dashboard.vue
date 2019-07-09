@@ -1,7 +1,8 @@
 <template>
   <div>
+    <h1>{{$t('dashboard.title')}}</h1>
     <div class="col-lg-12">
-      <h1>{{$t('dashboard.title')}}</h1>
+      
       <!-- <div v-show="!configLoaded" class="spinner spinner-lg"></div> -->
 
     </div>

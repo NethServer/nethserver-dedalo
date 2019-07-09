@@ -28,27 +28,57 @@ function _get
     echo $data | jq -r ".$field"
 }
 
+function register
+{
+    hotspot_id=$(_get hotspotId)
+    hotspot_name=$(_get hotspotName)
+    unit_description=$(_get unitDescription)
+    network_device=$(_get networkDevice)
+    hostname=$(_get hostname)
+    unit_name=$(_get unitName)
+
+    # update dedalo configuration
+    /sbin/e-smith/config setprop dedalo Id "$hotspot_id" Name "$hotspot_name" Description "$unit_description" IcaroHost "$hostname" UnitName "$unit_name"
+    if [ $? -gt 0 ]; then
+        invalid_error
+    fi
+
+    set hotspot role to network device
+    /sbin/e-smith/db networks setprop "$network_device" role hotspot
+    if [ $? -gt 0 ]; then
+        invalid_error
+    fi
+
+    tempfile=$(mktemp)
+    cat ~/.dedalo-token | jq -r ".token" > $tempfile
+
+    /sbin/e-smith/signal-event -j nethserver-dedalo-register $tempfile
+    if [ $? -gt 0 ]; then
+        error "EventFailed" "See /var/log/messages"
+    else
+        success
+    fi
+}
+
+function unregister
+{
+    /sbin/e-smith/signal-event -j nethserver-dedalo-unregister
+
+    if [ $? -gt 0 ]; then
+        error "EventFailed" "See /var/log/messages"
+    else
+        success
+    fi
+}
+
 # read input json
 data=$(cat /dev/stdin)
+action=$(_get action)
 
-hotspot_id=$(_get hotspotId)
-hotspot_name=$(_get hotspotName)
-unit_description=$(_get unitDescription)
-network_device=$(_get networkDevice)
-hostname=$(_get hostname)
-unit_name=$(_get unitName)
-
-# update dedalo configuration
-/sbin/e-smith/config setprop dedalo Id "$hotspot_id" Name "$hotspot_name" Description "$unit_description" IcaroHost "$hostname" UnitName "$unit_name" status enabled
-
-if [ $? -gt 0 ]; then
-    invalid_error
+if [ "$action" = "register" ];
+then
+    register
+elif [ "$action" = "unregister" ];
+then
+    unregister
 fi
-
-# todo uncomment!
-# /sbin/e-smith/signal-event -j nethserver-dedalo-register
-# if [ $? -gt 0 ]; then
-#     error "EventFailed" "See /var/log/messages"
-# else
-#     success
-# fi
