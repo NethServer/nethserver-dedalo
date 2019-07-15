@@ -27,7 +27,7 @@
       <div class="form-group">
         <div class="col-xs-12 col-sm-3 col-md-2">
           <select id="selectLogPath" class="selectpicker form-control" v-model="view.path" v-on:change="handleLogs()">
-            <option selected></option>
+            <option selected>dedalo</option>
           </select>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-8">
@@ -97,7 +97,7 @@ export default {
   data() {
     return {
       view: {
-        path: "dedalo-todo",
+        path: "dedalo",
         logsLoaded: false,
         logsContent: "",
         follow: false,
