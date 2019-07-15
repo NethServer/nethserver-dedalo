@@ -4,7 +4,7 @@
     
     <!-- error message -->
     <div v-if="errorMessage" class="alert alert-danger alert-dismissable">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <button type="button" class="close" @click="closeErrorMessage()" aria-label="Close">
         <span class="pficon pficon-close"></span>
       </button>
       <span class="pficon pficon-error-circle-o"></span>
@@ -145,6 +145,7 @@
       <!-- registration completed form -->
       <div v-if="authenticated && registered">
         <form class="form-horizontal" v-on:submit.prevent="btSaveClick">
+          <h3>{{$t('settings.hotspot')}}</h3>
           <!-- hotspot -->
           <div class="form-group">
             <label
@@ -183,6 +184,10 @@
               <span class="help-block" v-if="showErrorNetworkAddress">{{$t('settings.network_address_validation')}}</span>
             </div>
           </div>
+
+          <div class="divider" v-if="proxyStatus === 'enabled'"></div>
+          <h3 v-if="proxyStatus === 'enabled'">{{$t('settings.proxy')}}</h3>
+
           <!-- proxy -->
           <div class="form-group" :class="{ 'has-error': showErrorProxy }" v-if="proxyStatus === 'enabled'">
             <label
@@ -209,15 +214,12 @@
               for="textInput-modal-markup"
             >{{$t('settings.log_traffic')}}</label>
             <div class="col-sm-5">
-              <toggle-button
-                class="min-toggle"
-                :width="40"
-                :height="20"
-                :color="{checked: '#0088ce', unchecked: '#bbbbbb'}"
-                :value="dedaloConfig.LogTraffic === 'enabled'"
-                :sync="true"
-                @change="toggleLogTraffic()"
-              />
+              <input
+                @click="toggleLogTraffic()"
+                v-model="logTraffic"
+                type="checkbox"
+                class="form-control"
+              >
               <span class="help-block" v-if="showErrorLogTraffic">{{$t('settings.log_traffic_validation')}}</span>
             </div>
           </div>
@@ -230,11 +232,12 @@
           </div>
 
           <div class="divider"></div>
+          <h3>{{$t('settings.unregister')}}</h3>
 
           <!-- unregister button -->
           <div class="form-group margin-top-20">
             <label class="col-sm-2 control-label" for="textInput-modal-markup">
-              {{$t('settings.unregister_hotspot')}}
+              {{$t('settings.unregister_unit')}}
             </label>
             <div class="col-sm-5">
               <button class="btn btn-danger" type="button" @click="btUnregisterClick()">{{$t('settings.unregister')}}</button>
@@ -247,7 +250,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{$t('settings.release_hotspot_role_and_unregister')}}</h4>
+              <h4 class="modal-title">{{$t('settings.unregister_unit')}}</h4>
             </div>
             <form class="form-horizontal" v-on:submit.prevent="unregister()">
               <div class="modal-body">
@@ -297,7 +300,8 @@ export default {
       showErrorProxy: false,
       showErrorLogTraffic: false,
       errorMessage: null,
-      proxyStatus: ""
+      proxyStatus: "",
+      logTraffic: false
     }
   },
   methods: {
@@ -335,6 +339,7 @@ export default {
         function(success) {
           success = JSON.parse(success);
           ctx.dedaloConfig = success.configuration.props;
+          ctx.logTraffic = ctx.dedaloConfig.LogTraffic === 'enabled'
 
           if (ctx.token) {
             ctx.authenticationSuccess()
@@ -486,7 +491,10 @@ export default {
       );
     },
     readNetworkDevicesSuccess(networkDevicesOutput) {
-      this.networkDevicesLoaded(networkDevicesOutput)
+      var networkDevicesOk = this.networkDevicesLoaded(networkDevicesOutput)
+      if (!networkDevicesOk) {
+        return
+      }
 
       if (!this.dedaloConfig.UnitName) {
         // retrieve hostname and assign it to UnitName
@@ -611,7 +619,7 @@ export default {
       var configObjValidate = {
         "network": this.dedaloConfig.Network,
         "proxy": this.dedaloConfig.Proxy,
-        "logTraffic": this.dedaloConfig.LogTraffic,
+        "logTraffic": this.logTraffic ? 'enabled' : 'disabled',
         "device": this.networkDevice
       }
       var ctx = this;
@@ -698,6 +706,11 @@ export default {
     },
     networkDevicesLoaded(networkDevicesOutput) {
       var networkDevices = networkDevicesOutput.networkDevices
+
+      if (networkDevices.length == 0) {
+        this.showErrorMessage(this.$i18n.t("settings.no_network_device_found"))
+        return false
+      }
       this.networkDeviceList = []
       var networkDevice
       var foundHotspotDevice = false
@@ -714,6 +727,7 @@ export default {
       if (!foundHotspotDevice) {
         this.networkDevice = this.networkDeviceList[0].name
       }
+      return true
     },
     hotspotsLoaded(hotspotsOutput) {
       var hotspots = hotspotsOutput.hotspots.data
@@ -739,6 +753,9 @@ export default {
       } else {
         this.dedaloConfig.LogTraffic = "enabled"
       }
+    },
+    closeErrorMessage() {
+      this.errorMessage = null
     }
   }
 };

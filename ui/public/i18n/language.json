@@ -36,12 +36,14 @@
         "unregister_failed": "Unregister failed",
         "enable_transparent_proxy_on_hotspot": "Enable transparent proxy on hotspot",
         "log_traffic": "Log traffic",
-        "release_hotspot_role_and_unregister": "Release hotspot role and unregister",
-        "unregister_hotspot": "Unregister hotspot",
+        "unregister_unit": "Unregister unit",
         "network_address_validation": "Network address must use a valid CIDR notation",
         "proxy_validation": "Proxy must be 'enabled' or 'disabled'",
         "log_traffic_validation": "Log traffic must be 'enabled' or 'disabled'",
-        "error_retrieving_proxy_status": "Error retrieving proxy status"
+        "error_retrieving_proxy_status": "Error retrieving proxy status",
+        "hotspot": "Hotspot",
+        "proxy": "Proxy",
+        "no_network_device_found": "No network devices found. There must be at least a network device with role empty or 'hotspot'"
     },
     "about": {
         "title": "About",

@@ -31,11 +31,13 @@ def read_proxy_status():
     bash_command = "/sbin/e-smith/config getjson squid"
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
+    
+    # getjson return 1 for unknown configurations
+    if not output or output == "1":
+        return "unknown"
+    
     config_json = simplejson.loads(output)
     proxy_status = config_json['props']['status']
-    if not proxy_status:
-        proxy_status = "unknown"
-
     return proxy_status
 
 try:
