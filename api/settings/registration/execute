@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/python
 
 #
 # Copyright (C) 2019 Nethesis S.r.l.
@@ -20,65 +20,117 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-. /usr/libexec/nethserver/api/lib/helper_functions
+import sys
+import subprocess
+import simplejson
+import fileinput
+import os
+import tempfile
+import shlex
 
-function _get
-{
-    field=$1
-    echo $data | jq -r ".$field"
-}
+# todo remove unused imports
 
-function register
-{
-    hotspot_id=$(_get hotspotId)
-    hotspot_name=$(_get hotspotName)
-    unit_description=$(_get unitDescription)
-    network_device=$(_get networkDevice)
-    hostname=$(_get hostname)
-    unit_name=$(_get unitName)
+def register(input_json):
+    hotspot_id = input_json['hotspotId']
+    hotspot_name = input_json['hotspotName']
+    unit_description = input_json['unitDescription']
+    network_device = input_json['networkDevice']
+    hostname = input_json['hostname']
+    unit_name = input_json['unitName']
 
-    # update dedalo configuration
-    /sbin/e-smith/config setprop dedalo Id "$hotspot_id" Name "$hotspot_name" Description "$unit_description" IcaroHost "$hostname" UnitName "$unit_name"
-    if [ $? -gt 0 ]; then
-        invalid_error
-    fi
 
-    set hotspot role to network device
-    /sbin/e-smith/db networks setprop "$network_device" role hotspot
-    if [ $? -gt 0 ]; then
-        invalid_error
-    fi
+    try:
+        bash_command = "/sbin/e-smith/config setprop dedalo Id %s Name %s Description %s IcaroHost %s UnitName %s" % (hotspot_id, hotspot_name, unit_description, hostname, unit_name)
+        process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Error setting props: %s" % e
 
-    tempfile=$(mktemp)
-    cat ~/.dedalo-token | jq -r ".token" > $tempfile
+    # release hotspot role for all devices
+    try:
+        bash_command = "/sbin/e-smith/db networks getjson"
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Error retrieving db networks: %s" % e
 
-    /sbin/e-smith/signal-event -j nethserver-dedalo-register $tempfile
-    if [ $? -gt 0 ]; then
-        error "EventFailed" "See /var/log/messages"
-    else
-        success
-    fi
-}
+    networks_json = simplejson.loads(output)
+    hotspot_networks_to_reset = []
 
-function unregister
-{
-    /sbin/e-smith/signal-event -j nethserver-dedalo-unregister
+    for network in networks_json:
+        if network['props']['role'] == 'hotspot':
+            hotspot_networks_to_reset.append(network['name'])
 
-    if [ $? -gt 0 ]; then
-        error "EventFailed" "See /var/log/messages"
-    else
-        success
-    fi
-}
+    for network in hotspot_networks_to_reset:
+        try:
+            bash_command = "/sbin/e-smith/db 'networks' 'setprop' '%s' 'role' '' " % network
+            process = subprocess.Popen(shlex.split(bash_command), stdout=sys.stdout, stderr=sys.stderr)
+            output, error = process.communicate()
+        except Exception, e:
+            return "Error releasing hotspot role for network %s: %s" % (network, e)
 
-# read input json
-data=$(cat /dev/stdin)
-action=$(_get action)
+    # set hotspot role for the selected device
+    try:
+        bash_command = "/sbin/e-smith/db networks setprop %s role hotspot" % network_device
+        process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+        output, error = process.communicate()
+    except Exception, e:
+        return "Error setting hotspot role for network %s: %s" % (network, e)
 
-if [ "$action" = "register" ];
-then
-    register
-elif [ "$action" = "unregister" ];
-then
-    unregister
-fi
+    token_json = None
+
+    # write token to temp file
+    with open(os.getenv("HOME") + '/.dedalo-token') as f:
+        token_file = f.read()
+        token_json = simplejson.loads(token_file)
+    f.closed
+
+    token = token_json['token']
+
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(token)
+        tmp_file.flush()
+
+        try:
+            bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-register %s" % tmp_file.name
+            process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+            output, error = process.communicate()
+            return_code = process.returncode
+
+            if return_code != 0:
+                return "Event failed, see /var/log/messages"
+        except Exception, e:
+            return "Event failed, see /var/log/messages: %s" % e
+            
+def unregister(input_json):
+    try:
+        bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-unregister"
+        process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+        output, error = process.communicate()
+        return_code = process.returncode
+
+        if return_code != 0:
+            return "Event failed, see /var/log/messages"
+    except Exception, e:
+        return "Event failed, see /var/log/messages: %s" % e
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    app_info = input_json["action"]
+
+    if app_info == 'register':
+        error = register(input_json)
+    elif app_info == 'unregister':
+        error = unregister(input_json)
+        
+    if error:
+        output = simplejson.dumps({'state': 'error', 'message': error})
+        print(output)
+        sys.exit(1)
+    else:
+        output = simplejson.dumps({'state': 'success'})
+        print(output)
+except Exception, e:
+    print simplejson.dumps({ 'error': "%s" % e })
+    sys.exit(1)

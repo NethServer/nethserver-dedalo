@@ -75,6 +75,10 @@ def update(input_json):
         bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-save"
         process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
         output, error = process.communicate()
+        return_code = process.returncode
+
+        if return_code != 0:
+            return "Event failed, see /var/log/messages"
     except Exception, e:
         return "Event failed, see /var/log/messages: %s" % e
 
@@ -82,11 +86,14 @@ try:
     line = fileinput.input()[0].rstrip()
     input_json = simplejson.loads(line)
     error = update(input_json)
+    
     if error:
         output = simplejson.dumps({'state': 'error', 'message': error})
+        print(output)
+        sys.exit(1)
     else:
         output = simplejson.dumps({'state': 'success'})
-    print (output)
+        print(output)
 except Exception, e:
     print simplejson.dumps({ 'error': "%s" % e })
     sys.exit(1)
