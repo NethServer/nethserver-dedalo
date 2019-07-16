@@ -308,7 +308,7 @@ export default {
     getToken() {
       var ctx = this;
       nethserver.exec(
-        ["nethserver-dedalo/settings/authentication/read"],
+        ["nethserver-dedalo/authentication/read"],
         { "appInfo": "token" },
         null,
         function(success) {
@@ -321,7 +321,7 @@ export default {
       );
     },
     tokenSuccess(tokenOutput) {
-      this.token = tokenOutput.token;
+      this.token = tokenOutput.tokenData.token;
 
       if (this.token) {
         this.authenticated = true
@@ -333,7 +333,7 @@ export default {
     getConfig() {
       var ctx = this;
       nethserver.exec(
-        ["nethserver-dedalo/settings/authentication/read"],
+        ["nethserver-dedalo/authentication/read"],
         { "appInfo": "configuration" },
         null,
         function(success) {
@@ -373,7 +373,7 @@ export default {
       }
       var ctx = this;      
       nethserver.exec(
-        ["nethserver-dedalo/settings/authentication/validate"],
+        ["nethserver-dedalo/authentication/validate"],
         authObj,
         null,
         function(success) {
@@ -388,7 +388,7 @@ export default {
       var ctx = this
       // execute authentication
       nethserver.exec(
-        ["nethserver-dedalo/settings/authentication/execute"],
+        ["nethserver-dedalo/authentication/execute"],
         authObj,
         null,
         function(authOutput) {
@@ -419,7 +419,7 @@ export default {
       }
       var ctx = this;
       nethserver.exec(
-        ["nethserver-dedalo/settings/authentication/execute"],
+        ["nethserver-dedalo/authentication/execute"],
         saveTokenObj,
         null,
         function(success) {

@@ -62,7 +62,7 @@ def update(input_json):
         except Exception, e:
             return "Error releasing hotspot role for network %s: %s" % (network, e)
 
-    # set hotspot role for the selected device
+    # set hotspot role for selected device
     try:
         bash_command = "/sbin/e-smith/db networks setprop %s role hotspot" % device
         process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
@@ -86,7 +86,7 @@ try:
     line = fileinput.input()[0].rstrip()
     input_json = simplejson.loads(line)
     error = update(input_json)
-    
+
     if error:
         output = simplejson.dumps({'state': 'error', 'message': error})
         print(output)

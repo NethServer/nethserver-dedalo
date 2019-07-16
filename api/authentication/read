@@ -40,13 +40,13 @@ def read_token():
             is_token_ok = verify_token(token, hostname)
 
             if is_token_ok:
-                return token
+                return { 'token': token, 'icaroHost': hostname }
             else:
                 # token has expired
-                return ''
+                return { 'token': '', 'icaroHost': hostname }
     else:
         # token file doesn't exist
-        return ''
+        return { 'token': '', 'icaroHost': '' }
 
 def verify_token(token, hostname):
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -82,8 +82,8 @@ try:
     app_info = input_json["appInfo"]
 
     if app_info == 'token':
-        token = read_token()
-        output = simplejson.dumps({'token': token})
+        token_data = read_token()
+        output = simplejson.dumps({'tokenData': token_data})
         print (output)
     elif app_info == 'configuration':
         dedalo_config = read_config('dedalo')

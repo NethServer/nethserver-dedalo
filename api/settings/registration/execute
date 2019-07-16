@@ -67,7 +67,7 @@ def register(input_json):
         except Exception, e:
             return "Error releasing hotspot role for network %s: %s" % (network, e)
 
-    # set hotspot role for the selected device
+    # set hotspot role for selected device
     try:
         bash_command = "/sbin/e-smith/db networks setprop %s role hotspot" % network_device
         process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)

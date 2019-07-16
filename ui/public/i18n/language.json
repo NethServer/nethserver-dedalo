@@ -59,9 +59,32 @@
         "filter_label": "Regexp filter"
     },
     "dashboard":{
-        "title": "Hotspot"
+        "title": "Hotspot",
+        "error_retrieving_dashboard_data": "Error retrieving dashboard data",
+        "mac_address": "MAC address",
+        "ip_address": "IP address",
+        "connected": "Connected",
+        "session_key": "Session key",
+        "session_time": "Session time",
+        "idle_time": "Idle time",
+        "downloaded": "Downloaded",
+        "uploaded": "Uploaded",
+        "download_bandwidth": "Download bandwidth",
+        "upload_bandwidth": "Upload bandwidth",
+        "user_info": "User info",
+        "error_retrieving_user_info": "Error retrieving user info",
+        "please_authenticate_to_retrieve_user_info": "Please authenticate in Settings page to retrieve user info",
+        "user_info_name": "Name",
+        "user_info_email": "E-mail",
+        "user_info_account_type": "Account type"
     },
     "are_you_sure": "Are you sure",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "next": "Next",
+    "prev": "Previous",
+    "of": "of",
+    "rows_per_page": "Row per page",
+    "search": "Search",
+    "all": "All"
 }
