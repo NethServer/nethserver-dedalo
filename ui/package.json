@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "c3": "^0.6.13",
+    "moment": "^2.24.0",
     "v-suggestions": "^1.1.1",
     "vue": "^2.6.6",
     "vue-clipboard2": "^0.3.0",

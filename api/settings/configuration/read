@@ -24,8 +24,6 @@ import sys
 import fileinput
 import subprocess
 import simplejson
-import tempfile
-import socket
 
 def read_proxy_status():
     bash_command = "/sbin/e-smith/config getjson squid"

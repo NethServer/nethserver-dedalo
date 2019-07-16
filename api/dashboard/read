@@ -1,0 +1,162 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2019 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import os
+import simplejson
+import fileinput
+import subprocess
+import requests
+import tempfile
+
+def get_dashboard_data():
+    # TODO invoke "dedalo query list" command
+    users = []
+    dnat_users = 0
+    pass_users = 0
+
+    with open(os.getenv("HOME") + '/dedalo-query-list-mockup') as f:
+        for line in f:
+            tokens = line.split()
+            mac_address = tokens[0]
+            ip_address = tokens[1]
+            
+            status = tokens[2]
+            if status == 'dnat':
+                dnat_users += 1
+            elif status == 'pass':
+                pass_users += 1
+
+            session_key = tokens[3]
+            session_time = tokens[6]
+            session_time_elapsed = session_time.split("/")[0]
+            session_time_limit = session_time.split("/")[1]
+
+            idle_time = tokens[7]
+            idle_time_elapsed = idle_time.split("/")[0]
+            idle_time_limit = idle_time.split("/")[1]
+
+            input_octets = tokens[8]
+            input_octets_downloaded = input_octets.split("/")[0]
+            input_octets_limit = input_octets.split("/")[1]
+
+            output_octets = tokens[9]
+            output_octets_uploaded = output_octets.split("/")[0]
+            output_octets_limit = output_octets.split("/")[1]
+
+            swap_octets = tokens[11]
+            if swap_octets == "1":
+                # swap input and output octets
+                input_octets_downloaded, output_octets_uploaded = output_octets_uploaded, input_octets_downloaded
+                input_octets_limit, output_octets_limit = output_octets_limit, output_octets_limit
+
+            up_bandwidth = tokens[12]
+            up_bandwidth_perc = up_bandwidth.split("/")[0]
+            up_bandwidth_limit = up_bandwidth.split("/")[1]
+
+            down_bandwidth = tokens[13]
+            down_bandwidth_perc = down_bandwidth.split("/")[0]
+            down_bandwidth_limit = down_bandwidth.split("/")[1]
+            
+            user = { 'macAddress': mac_address, 
+                    'ipAddress': ip_address, 
+                    'status': status,
+                    'sessionKey': session_key, 
+
+                    'sessionTimeElapsed': session_time_elapsed, 
+                    'sessionTimeLimit': session_time_limit, 
+
+                    'idleTimeElapsed': idle_time_elapsed,
+                    'idleTimeLimit': idle_time_limit,
+
+                    'inputOctetsDownloaded': input_octets_downloaded, 
+                    'inputOctetsLimit': input_octets_limit, 
+
+                    'outputOctetsUploaded': output_octets_uploaded, 
+                    'outputOctetsLimit': output_octets_limit,
+
+                    'upBandwidthPerc': up_bandwidth_perc,
+                    'upBandwidthLimit': up_bandwidth_limit,
+                    
+                    'downBandwidthPerc': down_bandwidth_perc,
+                    'downBandwidthLimit': down_bandwidth_limit
+            }
+            users.append(user)
+    f.closed
+    return { 'hotspotUsers': users,
+            'dnatUsers': dnat_users,
+            'passUsers': pass_users
+    }
+
+def get_ip_address_info(ip_address, token, icaro_host):
+    url = "https://{}/api/sessions".format(icaro_host)
+
+    # print("url", url) # todo del
+
+    params = { 'q': ip_address }
+    headers = {'Content-Type': 'application/json', 'Token': token}
+    r = requests.get(url, headers=headers, params=params)
+
+    # print("r", r) # todo del
+    # print("r.json()", r.json()) # todo del
+    return r.json()
+
+def get_user_info(user_id, token, icaro_host):
+    url = "https://{}/api/users".format(icaro_host)
+
+    # print("url", url) # todo del
+
+    params = { 'q': user_id }
+    headers = {'Content-Type': 'application/json', 'Token': token}
+    r = requests.get(url, headers=headers, params=params)
+
+    # print("r", r) # todo del
+    # print("r.json()", r.json()) # todo del
+    return r.json()
+
+
+# try: # todo uncomment
+line = fileinput.input()[0].rstrip()
+input_json = simplejson.loads(line)
+app_info = input_json["appInfo"]
+
+if app_info == 'dashboardData':
+    dashboard_data = get_dashboard_data()
+    output = simplejson.dumps({'dashboardData': dashboard_data})
+    print(output)
+elif app_info == 'ipAddressInfo':
+    ip_address = input_json['ipAddress']
+    token = input_json['token']
+    icaro_host = input_json['icaroHost']
+    ip_address_info = get_ip_address_info(ip_address, token, icaro_host)
+    output = simplejson.dumps({'ipAddressInfo': ip_address_info})
+    print(output)
+elif app_info == 'userInfo':
+    user_id = input_json['userId']
+    token = input_json['token']
+    icaro_host = input_json['icaroHost']
+    user_info = get_user_info(user_id, token, icaro_host)
+    output = simplejson.dumps({'userInfo': user_info})
+    print(output)
+# except Exception, e:
+#     print simplejson.dumps({ 'error': "%s" % e })
+#     sys.exit(1)
