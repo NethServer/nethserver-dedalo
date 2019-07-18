@@ -132,6 +132,22 @@
               <span class="help-block" v-if="showErrorNetworkDevice">{{$t('settings.network_device_validation')}}</span>
             </div>
           </div>
+          <!-- network address -->
+          <div class="form-group" :class="{ 'has-error': showErrorNetworkAddress }">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.network_address')}}
+              <doc-info
+                :placement="'top'"
+                :title="$t('settings.network_address')"
+                :chapter="'network_address'"
+                :inline="true"
+              ></doc-info>
+            </label>
+            <div class="col-sm-5">
+              <input type="input" required class="form-control" v-model="dedaloConfig.Network">
+              <span class="help-block" v-if="showErrorNetworkAddress">{{$t('settings.network_address_validation')}}</span>
+            </div>
+          </div>
           <!-- register button -->
           <div class="form-group">
             <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
@@ -175,12 +191,17 @@
           </div>
           <!-- network address -->
           <div class="form-group" :class="{ 'has-error': showErrorNetworkAddress }">
-            <label
-              class="col-sm-2 control-label"
-              for="textInput-modal-markup"
-            >{{$t('settings.network_address')}}</label>
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.network_address')}}
+              <doc-info
+                :placement="'top'"
+                :title="$t('settings.network_address')"
+                :chapter="'network_address'"
+                :inline="true"
+              ></doc-info>
+            </label>
             <div class="col-sm-5">
-              <input type="input" class="form-control" v-model="dedaloConfig.Network">
+              <input type="input" required class="form-control" v-model="dedaloConfig.Network">
               <span class="help-block" v-if="showErrorNetworkAddress">{{$t('settings.network_address_validation')}}</span>
             </div>
           </div>
@@ -301,7 +322,8 @@ export default {
       showErrorLogTraffic: false,
       errorMessage: null,
       proxyStatus: "",
-      logTraffic: false
+      logTraffic: false,
+      oldNetworkDevice: ""
     }
   },
   methods: {
@@ -526,11 +548,13 @@ export default {
       this.showErrorHotspot = false;
       this.showErrorUnitDescription = false;
       this.showErrorNetworkDevice = false;
+      this.showErrorNetworkAddress = false;
 
       var registerObjValidate = {
         "hotspotId": this.hotspotList[this.selectedHotspotIndex].id,
         "unitDescription": this.dedaloConfig.Description,
-        "networkDevice": this.networkDevice
+        "networkDevice": this.networkDevice,
+        "networkAddress": this.dedaloConfig.Network
       }
       var ctx = this;
       nethserver.exec(
@@ -558,6 +582,8 @@ export default {
           this.showErrorUnitDescription = true;
         } else if (param === 'networkDevice') {
           this.showErrorNetworkDevice = true;
+        } else if (param === 'networkAddress') {
+          this.showErrorNetworkAddress = true;
         }
       }
     },
@@ -572,6 +598,7 @@ export default {
         "hotspotName": this.hotspotList[this.selectedHotspotIndex].name,
         "unitDescription": registerObjValidate.unitDescription,
         "networkDevice": registerObjValidate.networkDevice,
+        "networkAddress": registerObjValidate.networkAddress,
         "hostname": this.dedaloConfig.IcaroHost,
         "unitName": this.dedaloConfig.UnitName
       }
@@ -594,6 +621,7 @@ export default {
     },
     registrationSuccess() {
       this.registered = true
+      this.oldNetworkDevice = this.networkDevice
       var ctx = this;
       nethserver.exec(
         ["nethserver-dedalo/settings/configuration/read"],
@@ -647,7 +675,7 @@ export default {
           console.info("dedalo-configuration-update", stream); /* eslint-disable-line no-console */
         },
         function(success) {
-          ctx.getConfig()
+          ctx.configurationUpdateSuccess()
         },
         function(error) {
           console.error(error)  /* eslint-disable-line no-console */
@@ -672,6 +700,64 @@ export default {
         }
       }
     },
+    configurationUpdateSuccess() {
+      console.log('oldNetworkDevice', this.oldNetworkDevice, 'networkDevice', this.networkDevice) // todo del
+      if (this.networkDevice != this.oldNetworkDevice) {
+        this.unregisterAndRegister()
+      } else {
+        this.getConfig()
+      }
+    },
+    unregisterAndRegister() {
+      // unregister unit with old network address
+      nethserver.notifications.success = this.$i18n.t("settings.unregister_successful");
+      nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
+
+      var unregisterObj = {
+        "action": "unregister",
+        "logout": false
+      }
+      var ctx = this
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/execute"],
+        unregisterObj,
+        function(stream) {
+          console.info("dedalo-unregister", stream); /* eslint-disable-line no-console */
+        },
+        function(success) {
+          // re-register unit with new network address
+          nethserver.notifications.success = ctx.$i18n.t("settings.registration_successful");
+          nethserver.notifications.error = ctx.$i18n.t("settings.registration_failed");
+
+          var registerObjExecute = {
+            "action": "register",
+            "hotspotId": ctx.hotspotList[ctx.selectedHotspotIndex].id,
+            "hotspotName": ctx.hotspotList[ctx.selectedHotspotIndex].name,
+            "unitDescription": ctx.dedaloConfig.Description,
+            "networkDevice": ctx.networkDevice,
+            "networkAddress": ctx.dedaloConfig.Network,
+            "hostname": ctx.dedaloConfig.IcaroHost,
+            "unitName": ctx.dedaloConfig.UnitName
+          }
+          nethserver.exec(
+            ["nethserver-dedalo/settings/registration/execute"],
+            registerObjExecute,
+            function(stream) {
+              console.info("dedalo-register", stream); /* eslint-disable-line no-console */
+            },
+            function(success) {
+              ctx.getConfig()
+            },
+            function(error) {
+              console.error(error)  /* eslint-disable-line no-console */
+            }
+          );
+        },
+        function(error) {
+          console.error(error)  /* eslint-disable-line no-console */
+        }
+      );
+    },
     btUnregisterClick() {
       $("#unregisterModal").modal("show");
     },
@@ -682,7 +768,8 @@ export default {
       nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
 
       var unregisterObj = {
-        "action": "unregister"
+        "action": "unregister",
+        "logout": true
       }
       var ctx = this
 
@@ -702,7 +789,9 @@ export default {
     },
     unregisterSuccess() {
       this.registered = false
-      this.uiLoaded = true
+      this.authenticated = false
+      this.password = ""
+      this.getToken()
     },
     networkDevicesLoaded(networkDevicesOutput) {
       var networkDevices = networkDevicesOutput.networkDevices

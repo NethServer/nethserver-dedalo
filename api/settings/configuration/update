@@ -51,7 +51,7 @@ def update(input_json):
     hotspot_networks_to_reset = []
 
     for network in networks_json:
-        if network['props']['role'] == 'hotspot':
+        if 'role' in network['props'] and network['props']['role'] == 'hotspot':
             hotspot_networks_to_reset.append(network['name'])
 
     for network in hotspot_networks_to_reset:
