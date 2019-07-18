@@ -2,7 +2,7 @@
     "settings": {
         "title": "Settings",
         "hostname": "Host name",
-        "username": "User name",
+        "username": "Username",
         "password": "Password",
         "authenticate": "Authenticate",
         "hostname_validation": "Invalid host name or IP address",
@@ -76,7 +76,8 @@
         "please_authenticate_to_retrieve_user_info": "Please authenticate in Settings page to retrieve user info",
         "user_info_name": "Name",
         "user_info_email": "E-mail",
-        "user_info_account_type": "Account type"
+        "user_info_account_type": "Account type",
+        "no_user_connected": "No user connected"
     },
     "are_you_sure": "Are you sure",
     "save": "Save",

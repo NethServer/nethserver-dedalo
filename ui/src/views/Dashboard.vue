@@ -12,17 +12,12 @@
 
       <div v-show="!uiLoaded" class="spinner spinner-lg"></div>
       <div v-show="uiLoaded">
-        <div id="pie-chart-users"></div>
+        <div id="pie-chart-users" v-show="dashboardData.hotspotUsers.length > 0"></div>
+        <div v-show="dashboardData.hotspotUsers.length == 0" class="empty-piechart">
+          <div class="fa fa-pie-chart"></div>
+          <div>{{$t('dashboard.no_user_connected')}}</div>
+        </div>
 
-        <!-- todo delete   todo delete
-        <a href="#" data-toggle="popover" data-html="true"
-          :title="$t('dashboard.user_info')"
-          :data-content="userInfo"
-        >
-          popover test
-        </a> -->
-
-        <!-- todo qui sotto v-if="uiLoaded" -->
         <vue-good-table 
           :customRowsPerPageDropdown="[25,50,100]"
           :perPage="25"
@@ -41,13 +36,17 @@
         >
           <template slot="table-row" slot-scope="props">
             <td class="fancy">
-              <a href="#" data-toggle="popover" data-html="true"
+              <a href="#" 
+                v-if="props.row.status === 'pass'"
+                data-toggle="popover"
+                data-html="true"
                 :title="$t('dashboard.user_info')"
                 :id="'popover-' + props.row.ipAddress | sanitize"
                 @click="getIpAddressInfo(props.row.ipAddress)"
               >
                 {{ props.row.macAddress }}
               </a>
+              <span v-else>{{ props.row.macAddress }}</span>
             </td>
             <td class="fancy">
               {{ props.row.ipAddress}}
@@ -95,14 +94,13 @@ export default {
       uiLoaded: false,
       errorMessage: null,
       tableLangsTexts: this.tableLangs(),
-      // dashboardData: null, // todo uncomment
-      dashboardData: { // todo delete
+      dashboardData: {
         hotspotUsers: []
       },
-      userInfo: 'todo',
       token: '',
       icaroHost: '',
       authenticated: false,
+      popoverShown: [],
       tableColumns: [
         {
           label: this.$i18n.t("dashboard.mac_address"),
@@ -229,19 +227,16 @@ export default {
       var pieChartLegend = c3.generate(pieChartConfig);
     },
     getIpAddressInfo(ipAddress) {
-      if (!this.authenticated) {
-        // todo fix
-        this.userInfo = this.$i18n.t("dashboard.please_authenticate_to_retrieve_user_info")
-      } else {
-        var popover = $("#" + this.$options.filters.sanitize("popover-" + ipAddress));
-        var popoverData= popover.data("bs.popover");
+      var popoverId = "#" + this.$options.filters.sanitize("popover-" + ipAddress)
+      var popover = $(popoverId).data("bs.popover");
 
-        // if (popoverData.is(':visible')) { todo fix
-        //   popoverData.hide();
-        // } else {
+      if (!this.authenticated) {
+        popover.options.content = this.$i18n.t("dashboard.please_authenticate_to_retrieve_user_info")
+      } else {
+        if (this.popoverShown[popoverId] != true) {
           // show spinner on popover
-          popoverData.options.content = '<div class="spinner spinner-sm"></div>';
-          popoverData.show();
+          popover.options.content = '<div class="spinner spinner-sm"></div>';
+          popover.show();
 
           var ctx = this;
           nethserver.exec(
@@ -255,25 +250,28 @@ export default {
             null,
             function(success) {
               var ipAddressInfoOutput = JSON.parse(success);
-              ctx.getIpAddressInfoSuccess(ipAddressInfoOutput, popoverData)
+              ctx.getIpAddressInfoSuccess(ipAddressInfoOutput, popoverId)
             },
             function(error) {
-              this.userInfo = ctx.$i18n.t("dashboard.error_retrieving_user_info")
+              popover.options.content = ctx.$i18n.t("dashboard.error_retrieving_user_info")
               console.error(error) /* eslint-disable-line no-console */
             }
           );
-        // }
+        }
       }
     },
-    getIpAddressInfoSuccess(ipAddressInfoOutput, popoverData) {
+    getIpAddressInfoSuccess(ipAddressInfoOutput, popoverId) {
       var ipAddressInfo = ipAddressInfoOutput.ipAddressInfo
+      var popover = $(popoverId).data("bs.popover");
       
-      // if (ipAddressInfo.message) { // todo uncomment
-      //   // an error occured
-      //   this.userInfo = this.$i18n.t("dashboard.error_retrieving_user_info")
-      //   console.error(ipAddressInfo.message)
-      // } else {
-        var userId = 672062 // todo ipAddressInfo.data[0].user_id
+      if (ipAddressInfo.message) {
+        // an error occured
+        popover.options.content = this.$i18n.t("dashboard.error_retrieving_user_info")
+        this.popoverShown[popoverId] = true;
+        popover.show();
+        console.error(ipAddressInfo.message)
+      } else {
+        var userId = ipAddressInfo.data[0].user_id
         var ctx = this;
         nethserver.exec(
           ["nethserver-dedalo/dashboard/read"],
@@ -286,33 +284,33 @@ export default {
           null,
           function(success) {
             var userInfoOutput = JSON.parse(success);
-            ctx.getUserInfoSuccess(userInfoOutput, popoverData)
+            ctx.getUserInfoSuccess(userInfoOutput, popoverId)
           },
           function(error) {
-            ctx.userInfo = ctx.$i18n.t("dashboard.error_retrieving_user_info")
+            popover.options.content = ctx.$i18n.t("dashboard.error_retrieving_user_info")
             console.error(error) /* eslint-disable-line no-console */
           }
         );
-      // } // uncomment
+      }
     },
-    getUserInfoSuccess(userInfoOutput, popoverData) {
+    getUserInfoSuccess(userInfoOutput, popoverId) {
       var userInfo = userInfoOutput.userInfo
-      // if (userInfo.message) { // todo uncomment
-      //   // an error occured
-      //   this.userInfo = this.$i18n.t("dashboard.error_retrieving_user_info")
-      //   console.error(userInfo.message)
-      // } else {
-        userInfo.name = "Tony Stark" // todo delete
-        userInfo.email = "tony@stakindustries.com"
-        userInfo.account_type = "Facebook"
-        
-        this.userInfo = '<p>' + this.$i18n.t("dashboard.user_info_name") + ': <b>' + userInfo.name + '</b></p>' + 
+      var popover = $(popoverId).data("bs.popover");
+
+      if (userInfo.message) {
+        // an error occured
+        popover.options.content = this.$i18n.t("dashboard.error_retrieving_user_info")
+        this.popoverShown[popoverId] = true;
+        popover.show();
+        console.error(userInfo.message)
+      } else {
+        popover.options.content = '<p>' + this.$i18n.t("dashboard.user_info_name") + ': <b>' + userInfo.name + '</b></p>' + 
                         '<p>' + this.$i18n.t("dashboard.user_info_email") + ': <b>' + userInfo.email + '</b></p>' +
                         '<p>' + this.$i18n.t("dashboard.user_info_account_type") + ': <b>' + userInfo.account_type + '</b></p>'
 
-        popoverData.options.content = this.userInfo;
-        popoverData.show();
-      // } // uncomment
+        this.popoverShown[popoverId] = true;
+        popover.show();
+      }
     },
     getToken() {
       var ctx = this;
@@ -343,9 +341,6 @@ export default {
       this.readDashboardData()
     },
     initPopovers() {
-      console.log("popover length", $('[data-toggle=popover]').length) // todo del
-      console.log('dashboardData.hotspotUsers', this.dashboardData.hotspotUsers) // todo del
-
       // Initialize Popovers
       setTimeout(function() {
         $('[data-toggle=popover]').popovers()
@@ -372,5 +367,16 @@ export default {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 20px;
+}
+
+.empty-piechart {
+  margin: 2em;
+  text-align: center;
+  color: #9c9c9c;
+}
+
+.empty-piechart .fa {
+  font-size: 200px;
+  color: #bbbbbb;
 }
 </style>
