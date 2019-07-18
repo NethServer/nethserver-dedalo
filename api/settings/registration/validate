@@ -29,6 +29,7 @@ $validator = new LegacyValidator($data);
 $validator->declareParameter('hotspotId', Validate::NOTEMPTY);
 $validator->declareParameter('unitDescription', Validate::ANYTHING);
 $validator->declareParameter('networkDevice', Validate::NOTEMPTY);
+$validator->declareParameter('networkAddress', Validate::CIDR_BLOCK);
 
 # Validate the input
 if (!$validator->validate()) {

@@ -33,13 +33,13 @@ def register(input_json):
     hotspot_name = input_json['hotspotName']
     unit_description = input_json['unitDescription']
     network_device = input_json['networkDevice']
+    network_address = input_json['networkAddress']
     hostname = input_json['hostname']
     unit_name = input_json['unitName']
 
-
     try:
-        bash_command = "/sbin/e-smith/config setprop dedalo Id %s Name %s Description %s IcaroHost %s UnitName %s" % (hotspot_id, hotspot_name, unit_description, hostname, unit_name)
-        process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+        command_args = ['/sbin/e-smith/config', 'setprop', 'dedalo', 'Id', str(hotspot_id), 'Name', hotspot_name, 'Description', unit_description, 'IcaroHost', hostname, 'UnitName', unit_name, 'Network', network_address]
+        process = subprocess.Popen(command_args, stdout=sys.stdout, stderr=sys.stderr)
         output, error = process.communicate()
     except Exception, e:
         return "Error setting props: %s" % e
@@ -100,7 +100,7 @@ def register(input_json):
         except Exception, e:
             return "Event failed, see /var/log/messages: %s" % e
             
-def unregister(input_json):
+def unregister(input_json, logout_user):
     try:
         bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-unregister"
         process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
@@ -109,6 +109,9 @@ def unregister(input_json):
 
         if return_code != 0:
             return "Event failed, see /var/log/messages"
+
+        if logout_user:
+            os.remove(os.getenv("HOME") + '/.dedalo-token')
     except Exception, e:
         return "Event failed, see /var/log/messages: %s" % e
 
@@ -120,7 +123,9 @@ try:
     if app_info == 'register':
         error = register(input_json)
     elif app_info == 'unregister':
-        error = unregister(input_json)
+        logout = input_json["logout"]
+        error = unregister(input_json, logout)
+        
         
     if error:
         output = simplejson.dumps({'state': 'error', 'message': error})
