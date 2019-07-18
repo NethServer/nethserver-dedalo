@@ -24,6 +24,10 @@ env:
         -e STAGES_PACK
         -e UPLOAD_DEST
         "
+
+install:
+- ./prep-sources
+
 script: >
     docker run -ti --name makerpms ${EVARS}
     --hostname b${TRAVIS_BUILD_NUMBER}.nethserver.org
