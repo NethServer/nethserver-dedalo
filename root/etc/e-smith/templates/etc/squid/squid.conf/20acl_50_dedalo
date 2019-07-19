@@ -17,6 +17,5 @@
         } else {
             $OUT .= "access_log none dedalo\n";
         }
-        $OUT .= "access_log daemon:/var/log/squid/access.log squid !dedalo\n";
     }
 }
