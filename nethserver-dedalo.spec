@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.1.0
+Version: 1.1.1
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -36,6 +36,9 @@ rm -rf %{buildroot}
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Mon Jul 22 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.1-1
+- Dedalo: corrupted squid access log - Bug NethServer/dev#5792
+
 * Tue May 28 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.0-1
 - Dedalo: support Web Proxy bypasses - NethServer/dev#5765
 
