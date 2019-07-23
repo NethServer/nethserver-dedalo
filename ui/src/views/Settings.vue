@@ -11,6 +11,15 @@
       {{ errorMessage }}.
     </div>
 
+    <!-- warning message -->
+    <div v-if="warningMessage" class="alert alert-warning alert-dismissable">
+      <button type="button" class="close" @click="closeWarningMessage()" aria-label="Close">
+        <span class="pficon pficon-close"></span>
+      </button>
+      <span class="pficon pficon-warning-triangle-o"></span>
+      {{ warningMessage }}.
+    </div>
+
     <div v-if="!uiLoaded" class="spinner spinner-lg"></div>
     <div v-if="uiLoaded">
       <!-- authentication form -->
@@ -122,12 +131,12 @@
               for="textInput-modal-markup"
             >{{$t('settings.network_device')}}</label>
             <div class="col-sm-5">
-              <select required type="text" class="combobox form-control" v-model="networkDevice">
+              <select required type="text" class="combobox form-control" v-model="networkDevice" @change="changedNetworkDevice()">
                 <option
-                  v-for="(networkDevice, index) in networkDeviceList"
+                  v-for="(device, index) in networkDeviceList"
                   v-bind:key="index"
-                  :value="networkDevice.name"
-                >{{ networkDevice.name + (networkDevice.hotspot_assigned ? (" - " + $t('settings.hotspot_assigned')) : "") }}</option>
+                  :value="device.name"
+                >{{ device.name + (device.hotspot_assigned ? (" - " + $t('settings.hotspot_assigned')) : "") }}</option>
               </select>
               <span class="help-block" v-if="showErrorNetworkDevice">{{$t('settings.network_device_validation')}}</span>
             </div>
@@ -143,9 +152,56 @@
                 :inline="true"
               ></doc-info>
             </label>
-            <div class="col-sm-5">
+            <div class="col-sm-3">
               <input type="input" required class="form-control" v-model="dedaloConfig.Network">
               <span class="help-block" v-if="showErrorNetworkAddress">{{$t('settings.network_address_validation')}}</span>
+            </div>
+            <!-- default dhcp range -->
+            <div class="col-sm-2 adjust-index">
+              <button
+                tabindex="-1"
+                type="button"
+                class="btn btn-primary"
+                @click="defaultDhcpRange()"
+              >
+              {{$t('settings.default_dhcp_range')}}
+              </button>
+            </div>
+          </div>
+          <!-- dhcp range start -->
+          <div class="form-group" :class="{ 'has-error': showErrorDhcpRangeStart }">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.dhcp_range_start')}}
+              <doc-info
+                :placement="'top'"
+                :title="$t('settings.dhcp_range_start')"
+                :chapter="'dhcp_range_start'"
+                :inline="true"
+              ></doc-info>
+            </label>
+            <div class="col-sm-3">
+              <input type="input" required class="form-control" v-model="dhcpRangeStart">
+              <span class="help-block" v-if="showErrorDhcpRangeStart">
+                {{ errorDhcpRangeStart === 'invalid_range' ? $t('settings.dhcp_range_start_validation_invalid_range') : $t('settings.dhcp_range_start_validation') }}
+              </span>
+            </div>
+          </div>
+          <!-- dhcp range end -->
+          <div class="form-group" :class="{ 'has-error': showErrorDhcpRangeEnd }">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.dhcp_range_end')}}
+              <doc-info
+                :placement="'top'"
+                :title="$t('settings.dhcp_range_end')"
+                :chapter="'dhcp_range_end'"
+                :inline="true"
+              ></doc-info>
+            </label>
+            <div class="col-sm-3">
+              <input type="input" required class="form-control" v-model="dhcpRangeEnd">
+              <span class="help-block" v-if="showErrorDhcpRangeEnd">
+                {{ errorDhcpRangeEnd === 'invalid_range' ? $t('settings.dhcp_range_end_validation_invalid_range') : $t('settings.dhcp_range_end_validation') }}
+              </span>
             </div>
           </div>
           <!-- register button -->
@@ -179,12 +235,12 @@
               for="textInput-modal-markup"
             >{{$t('settings.network_device')}}</label>
             <div class="col-sm-5">
-              <select required type="text" class="combobox form-control" v-model="networkDevice">
+              <select required type="text" class="combobox form-control" v-model="networkDevice" @change="changedNetworkDevice()">
                 <option
-                  v-for="(networkDevice, index) in networkDeviceList"
+                  v-for="(device, index) in networkDeviceList"
                   v-bind:key="index"
-                  :value="networkDevice.name"
-                >{{ networkDevice.name + (networkDevice.hotspot_assigned ? (" - " + $t('settings.hotspot_assigned')) : "") }}</option>
+                  :value="device.name"
+                >{{ device.name + (device.hotspot_assigned ? (" - " + $t('settings.hotspot_assigned')) : "") }}</option>
               </select>
               <span class="help-block" v-if="showErrorNetworkDevice">{{$t('settings.network_device_validation')}}</span>
             </div>
@@ -200,9 +256,56 @@
                 :inline="true"
               ></doc-info>
             </label>
-            <div class="col-sm-5">
+            <div class="col-sm-3">
               <input type="input" required class="form-control" v-model="dedaloConfig.Network">
               <span class="help-block" v-if="showErrorNetworkAddress">{{$t('settings.network_address_validation')}}</span>
+            </div>
+            <!-- default dhcp range -->
+            <div class="col-sm-2 adjust-index">
+              <button
+                tabindex="-1"
+                type="button"
+                class="btn btn-primary"
+                @click="defaultDhcpRange()"
+              >
+              {{$t('settings.default_dhcp_range')}}
+              </button>
+            </div>
+          </div>
+          <!-- dhcp range start -->
+          <div class="form-group" :class="{ 'has-error': showErrorDhcpRangeStart }">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.dhcp_range_start')}}
+              <doc-info
+                :placement="'top'"
+                :title="$t('settings.dhcp_range_start')"
+                :chapter="'dhcp_range_start'"
+                :inline="true"
+              ></doc-info>
+            </label>
+            <div class="col-sm-3">
+              <input type="input" required class="form-control" v-model="dhcpRangeStart">
+              <span class="help-block" v-if="showErrorDhcpRangeStart">
+                {{ errorDhcpRangeStart === 'invalid_range' ? $t('settings.dhcp_range_start_validation_invalid_range') : $t('settings.dhcp_range_start_validation') }}
+              </span>
+            </div>
+          </div>
+          <!-- dhcp range end -->
+          <div class="form-group" :class="{ 'has-error': showErrorDhcpRangeEnd }">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              {{$t('settings.dhcp_range_end')}}
+              <doc-info
+                :placement="'top'"
+                :title="$t('settings.dhcp_range_end')"
+                :chapter="'dhcp_range_end'"
+                :inline="true"
+              ></doc-info>
+            </label>
+            <div class="col-sm-3">
+              <input type="input" required class="form-control" v-model="dhcpRangeEnd">
+              <span class="help-block" v-if="showErrorDhcpRangeEnd">
+                {{ errorDhcpRangeEnd === 'invalid_range' ? $t('settings.dhcp_range_end_validation_invalid_range') : $t('settings.dhcp_range_end_validation') }}
+              </span>
             </div>
           </div>
 
@@ -323,7 +426,14 @@ export default {
       errorMessage: null,
       proxyStatus: "",
       logTraffic: false,
-      oldNetworkDevice: ""
+      oldNetworkDevice: "",
+      warningMessage: null,
+      showErrorDhcpRangeStart: false,
+      showErrorDhcpRangeEnd: false,
+      dhcpRangeStart: "",
+      dhcpRangeEnd: "",
+      errorDhcpRangeStart: "",
+      errorDhcpRangeEnd: ""
     }
   },
   methods: {
@@ -517,6 +627,41 @@ export default {
       if (!networkDevicesOk) {
         return
       }
+      var dhcpRangeObj;
+
+      if (this.dedaloConfig.DhcpStart) {
+        // dhcp range is present in configuration
+        dhcpRangeObj = {
+          "appInfo": "dhcpRange",
+          "dhcpStart": this.dedaloConfig.DhcpStart,
+          "dhcpEnd": this.dedaloConfig.DhcpEnd,
+          "networkAddress": this.dedaloConfig.Network
+        }
+      } else {
+        // dhcp range not present in configuration
+        dhcpRangeObj = {
+          "appInfo": "dhcpRange",
+          "networkAddress": this.dedaloConfig.Network
+        }
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/read"],
+        dhcpRangeObj,
+        null,
+        function(success) {
+          var dhcpRangeOutput = JSON.parse(success);
+          ctx.dhcpRangeSuccess(dhcpRangeOutput)
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_range_dhcp"), error)
+        }
+      );
+    },
+    dhcpRangeSuccess(dhcpRangeOutput) {
+      var dhcpRange = dhcpRangeOutput.dhcpRange
+      this.dhcpRangeStart = dhcpRange.start
+      this.dhcpRangeEnd = dhcpRange.end
 
       if (!this.dedaloConfig.UnitName) {
         // retrieve hostname and assign it to UnitName
@@ -549,12 +694,16 @@ export default {
       this.showErrorUnitDescription = false;
       this.showErrorNetworkDevice = false;
       this.showErrorNetworkAddress = false;
+      this.showErrorDhcpRangeStart = false;
+      this.showErrorDhcpRangeEnd = false;
 
       var registerObjValidate = {
         "hotspotId": this.hotspotList[this.selectedHotspotIndex].id,
         "unitDescription": this.dedaloConfig.Description,
         "networkDevice": this.networkDevice,
-        "networkAddress": this.dedaloConfig.Network
+        "networkAddress": this.dedaloConfig.Network,
+        "dhcpRangeStart": this.dhcpRangeStart,
+        "dhcpRangeEnd": this.dhcpRangeEnd
       }
       var ctx = this;
       nethserver.exec(
@@ -578,12 +727,19 @@ export default {
 
         if (param === 'hotspot') {
           this.showErrorHotspot = true;
+
         } else if (param === 'unitDescription') {
           this.showErrorUnitDescription = true;
         } else if (param === 'networkDevice') {
           this.showErrorNetworkDevice = true;
         } else if (param === 'networkAddress') {
           this.showErrorNetworkAddress = true;
+        } else if (param === 'dhcpRangeStart') {
+          this.showErrorDhcpRangeStart = true;
+          this.errorDhcpRangeStart = attr.error;
+        } else if (param === 'dhcpRangeEnd') {
+          this.showErrorDhcpRangeEnd = true;
+          this.errorDhcpRangeEnd = attr.error;
         }
       }
     },
@@ -600,7 +756,9 @@ export default {
         "networkDevice": registerObjValidate.networkDevice,
         "networkAddress": registerObjValidate.networkAddress,
         "hostname": this.dedaloConfig.IcaroHost,
-        "unitName": this.dedaloConfig.UnitName
+        "unitName": this.dedaloConfig.UnitName,
+        "dhcpRangeStart": this.dhcpRangeStart,
+        "dhcpRangeEnd": this.dhcpRangeEnd
       }
       var ctx = this
 
@@ -643,12 +801,20 @@ export default {
       this.showErrorNetworkAddress = false;
       this.showErrorProxy = false;
       this.showErrorLogTraffic = false;
+      this.showErrorDhcpRangeStart = false;
+      this.showErrorDhcpRangeEnd = false;
+      this.warningMessage = null
+
+      var networkDeviceObj = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
 
       var configObjValidate = {
         "network": this.dedaloConfig.Network,
         "proxy": this.dedaloConfig.Proxy,
         "logTraffic": this.logTraffic ? 'enabled' : 'disabled',
-        "device": this.networkDevice
+        "device": this.networkDevice,
+        "ipAddress": networkDeviceObj.ip_address,
+        "dhcpRangeStart": this.dhcpRangeStart,
+        "dhcpRangeEnd": this.dhcpRangeEnd
       }
       var ctx = this;
       nethserver.exec(
@@ -697,11 +863,16 @@ export default {
           this.showErrorLogTraffic = true;
         } else if (param === 'device') {
           this.showErrorNetworkDevice = true;
+        } else if (param === 'dhcpRangeStart') {
+          this.showErrorDhcpRangeStart = true;
+          this.errorDhcpRangeStart = attr.error;
+        } else if (param === 'dhcpRangeEnd') {
+          this.showErrorDhcpRangeEnd = true;
+          this.errorDhcpRangeEnd = attr.error;
         }
       }
     },
     configurationUpdateSuccess() {
-      console.log('oldNetworkDevice', this.oldNetworkDevice, 'networkDevice', this.networkDevice) // todo del
       if (this.networkDevice != this.oldNetworkDevice) {
         this.unregisterAndRegister()
       } else {
@@ -737,7 +908,9 @@ export default {
             "networkDevice": ctx.networkDevice,
             "networkAddress": ctx.dedaloConfig.Network,
             "hostname": ctx.dedaloConfig.IcaroHost,
-            "unitName": ctx.dedaloConfig.UnitName
+            "unitName": ctx.dedaloConfig.UnitName,
+            "dhcpRangeStart": ctx.dhcpRangeStart,
+            "dhcpRangeEnd": ctx.dhcpRangeEnd
           }
           nethserver.exec(
             ["nethserver-dedalo/settings/registration/execute"],
@@ -816,6 +989,13 @@ export default {
       if (!foundHotspotDevice) {
         this.networkDevice = this.networkDeviceList[0].name
       }
+
+      var device = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
+
+      if (device.hotspot_assigned && device.ip_address) {
+        this.warningMessage = this.$i18n.t("settings.warning_hotspot_device_ip_address")
+      }
+
       return true
     },
     hotspotsLoaded(hotspotsOutput) {
@@ -826,8 +1006,11 @@ export default {
       for (hotspot of hotspots) {
         this.hotspotList.push(hotspot)
       }
-      // select the first hotspot by default
-      this.selectedHotspotIndex = 0
+
+      if (!this.selectedHotspotIndex) {
+        // select the first hotspot by default
+        this.selectedHotspotIndex = 0
+      }
     },
     toggleProxy() {
       if (this.dedaloConfig.Proxy === "enabled") {
@@ -845,6 +1028,38 @@ export default {
     },
     closeErrorMessage() {
       this.errorMessage = null
+    },
+    closeWarningMessage() {
+      this.warningMessage = null
+    },
+    changedNetworkDevice() {
+      this.warningMessage = null
+      var device = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
+
+      if (device.hotspot_assigned && device.ip_address) {
+        this.warningMessage = this.$i18n.t("settings.warning_hotspot_device_ip_address")
+      }
+    },
+    defaultDhcpRange() {
+      var dhcpRangeObj = {
+        "appInfo": "dhcpRange",
+        "networkAddress": this.dedaloConfig.Network
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/read"],
+        dhcpRangeObj,
+        null,
+        function(success) {
+          var dhcpRangeOutput = JSON.parse(success);
+          var dhcpRange = dhcpRangeOutput.dhcpRange
+          ctx.dhcpRangeStart = dhcpRange.start
+          ctx.dhcpRangeEnd = dhcpRange.end
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_range_dhcp"), error)
+        }
+      );
     }
   }
 };

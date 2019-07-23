@@ -24,16 +24,38 @@ import sys
 import fileinput
 import subprocess
 import simplejson
-import shlex
+import ipaddress
 
 def update(input_json):
     network = input_json['network']
     proxy = input_json['proxy']
     log_traffic = input_json['logTraffic']
     device = input_json['device']
+    ip_address = input_json['ipAddress']
+    dhcp_range_start = input_json['dhcpRangeStart']
+    dhcp_range_end = input_json['dhcpRangeEnd']
+
+    # check and convert dhcp range values to integer
+    network_dhcp = ipaddress.ip_network(u''+network)
+    hosts = list(network_dhcp.hosts())
+    first, last = str(hosts[0]), str(hosts[-1])
+    network_ip_string = network.split("/")[0]
+    network_int = int(ipaddress.IPv4Address(u'' + network_ip_string))
+    firstClient = int(ipaddress.IPv4Address(u'' + first)) + 1 # first address is reserved for hotspot
+    lastClient = int(ipaddress.IPv4Address(u'' + last))
+    dhcp_range_start_int = int(ipaddress.IPv4Address(u'' + dhcp_range_start))
+    dhcp_range_end_int = int(ipaddress.IPv4Address(u'' + dhcp_range_end))
+    
+    if dhcp_range_start_int < firstClient or \
+            dhcp_range_end_int > lastClient or \
+            dhcp_range_start_int > dhcp_range_end_int:
+        return "Invalid DHCP range"
+
+    config_dhcp_start = dhcp_range_start_int - network_int
+    config_dhcp_end = dhcp_range_end_int - network_int
 
     try:
-        bash_command = "/sbin/e-smith/config setprop dedalo Network %s Proxy %s LogTraffic %s" % (network, proxy, log_traffic)
+        bash_command = "/sbin/e-smith/config setprop dedalo Network %s DhcpStart %s DhcpEnd %s Proxy %s LogTraffic %s" % (network, config_dhcp_start, config_dhcp_end, proxy, log_traffic)
         process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
     except Exception, e:
@@ -56,8 +78,13 @@ def update(input_json):
 
     for network in hotspot_networks_to_reset:
         try:
-            bash_command = "/sbin/e-smith/db 'networks' 'setprop' '%s' 'role' '' " % network
-            process = subprocess.Popen(shlex.split(bash_command), stdout=subprocess.PIPE)
+            # if network device has an ip address, reset ipaddr and netmask
+            if ip_address:
+                command_args = ['/sbin/e-smith/db', 'networks', 'setprop', network, 'role', '', 'ipaddr', '', 'netmask', '']
+            else:
+                command_args = ['/sbin/e-smith/db', 'networks', 'setprop', network, 'role', '']
+            
+            process = subprocess.Popen(command_args, stdout=subprocess.PIPE)
             output, error = process.communicate()
         except Exception, e:
             return "Error releasing hotspot role for network %s: %s" % (network, e)
@@ -69,6 +96,18 @@ def update(input_json):
         output, error = process.communicate()
     except Exception, e:
         return "Error setting hotspot role for network %s: %s" % (network, e)
+
+    if ip_address:
+        try:
+            bash_command = "/sbin/e-smith/signal-event -j interface-update"
+            process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+            output, error = process.communicate()
+            return_code = process.returncode
+
+            if return_code != 0:
+                return "Event failed, see /var/log/messages"
+        except Exception, e:
+            return "Event failed, see /var/log/messages: %s" % e
 
     # nethserver-dedalo-save
     try:

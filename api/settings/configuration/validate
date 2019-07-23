@@ -1,38 +1,159 @@
-#!/usr/bin/php
-<?php
-/*
- * Copyright (C) 2019 Nethesis S.r.l.
- * http://www.nethesis.it - nethserver@nethesis.it
- *
- * This script is part of NethServer.
- *
- * NethServer is free software: you can redistribute it and/or modify
- * it under tthe terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License,
- * or any later version.
- *
- * NethServer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with NethServer.  If not, see COPYING.
-*/
+#!/usr/bin/python
 
-require_once("/usr/libexec/nethserver/api/lib/Helpers.php");
+#
+# Copyright (C) 2019 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
 
-$data = readInput();
-$validator = new LegacyValidator($data);
+import sys
+import fileinput
+import simplejson
+import ipaddress
 
-$validator->declareParameter('device', Validate::NOTEMPTY);
-$validator->declareParameter('network', Validate::CIDR_BLOCK);
-$validator->declareParameter('proxy', Validate::SERVICESTATUS);
-$validator->declareParameter('logTraffic', Validate::SERVICESTATUS);
+def invalid_attribute(parameter, error):
+    return { "parameter": parameter, "error": error, "value": "" }
 
-# Validate the input
-if (!$validator->validate()) {
-    error($validator);
-}
+line = fileinput.input()[0].rstrip()
+input_json = simplejson.loads(line)
+invalid_attributes = []
 
-success();
+network_device_p = 'device'
+network_address_p = 'network'
+dhcp_range_start_p = 'dhcpRangeStart'
+dhcp_range_end_p = 'dhcpRangeEnd'
+proxy_p = 'proxy'
+log_traffic_p = 'logTraffic'
+
+# network device
+
+if (network_device_p not in input_json) or (not input_json[network_device_p]):
+    invalid_attributes.append(invalid_attribute(network_device_p, "empty"))
+
+# network address
+
+if (network_address_p not in input_json) or (not input_json[network_address_p]):
+    invalid_attributes.append(invalid_attribute(network_address_p, "empty"))
+
+network_dhcp = None
+
+if network_address_p in input_json:
+    network_address = input_json[network_address_p]
+
+    if "/" not in network_address:
+        invalid_attributes.append(invalid_attribute(network_address_p, "invalid"))
+
+    try:
+        network_dhcp = ipaddress.ip_network(u''+network_address)
+    except Exception:
+        invalid_attributes.append(invalid_attribute(network_address_p, "invalid"))
+
+# dhcp range start
+
+if (dhcp_range_start_p not in input_json) or (not input_json[dhcp_range_start_p]):
+    invalid_attributes.append(invalid_attribute(dhcp_range_start_p, "empty"))
+
+if dhcp_range_start_p in input_json:
+    dhcp_range_start = input_json[dhcp_range_start_p]
+
+    try:
+        ipaddress.ip_address(u'' + dhcp_range_start)
+    except Exception:
+        invalid_attributes.append(invalid_attribute(dhcp_range_start_p, "invalid"))
+
+# dhcp range end
+
+if (dhcp_range_end_p not in input_json) or (not input_json[dhcp_range_end_p]):
+    invalid_attributes.append(invalid_attribute(dhcp_range_end_p, "empty"))
+
+if dhcp_range_end_p in input_json:
+    dhcp_range_end = input_json[dhcp_range_end_p]
+
+    try:
+        ipaddress.ip_address(u'' + dhcp_range_end)
+    except Exception:
+        invalid_attributes.append(invalid_attribute(dhcp_range_end_p, "invalid"))
+
+# dhcp range values
+
+if network_dhcp:
+    hosts = list(network_dhcp.hosts())
+
+    if len(hosts) == 0:
+        invalid_attributes.append(invalid_attribute(network_address_p, "invalid"))
+    else:
+        first, last = str(hosts[0]), str(hosts[-1])
+        firstClient = int(ipaddress.IPv4Address(u'' + first)) + 1 # first address is reserved for hotspot
+        lastClient = int(ipaddress.IPv4Address(u'' + last))
+
+        dhcp_range_start_int = None
+
+        try:
+            dhcp_range_start_int = int(ipaddress.IPv4Address(u'' + dhcp_range_start))
+        except Exception:
+            invalid_attributes.append(invalid_attribute(dhcp_range_start_p, "invalid"))
+
+        dhcp_range_end_int = None
+
+        try:
+            dhcp_range_end_int = int(ipaddress.IPv4Address(u'' + dhcp_range_end))
+        except Exception:
+            invalid_attributes.append(invalid_attribute(dhcp_range_end_p, "invalid"))
+
+        if dhcp_range_start_int and dhcp_range_end_int:
+            if dhcp_range_start_int < firstClient:
+                invalid_attributes.append(invalid_attribute(dhcp_range_start_p, "invalid_range"))
+
+            if dhcp_range_end_int > lastClient:
+                invalid_attributes.append(invalid_attribute(dhcp_range_end_p, "invalid_range"))
+
+            if dhcp_range_start_int > dhcp_range_end_int:
+                invalid_attributes.append(invalid_attribute(dhcp_range_start_p, "invalid_range"))
+                invalid_attributes.append(invalid_attribute(dhcp_range_end_p, "invalid_range"))
+
+# proxy
+
+if (proxy_p not in input_json) or (not input_json[proxy_p]):
+    invalid_attributes.append(invalid_attribute(proxy_p, "empty"))
+
+if proxy_p in input_json:
+    if input_json[proxy_p] not in [ "enabled", "disabled" ]:
+        invalid_attributes.append(invalid_attribute(proxy_p, "invalid"))
+
+# log traffic
+
+if (log_traffic_p not in input_json) or (not input_json[log_traffic_p]):
+    invalid_attributes.append(invalid_attribute(log_traffic_p, "empty"))
+
+if log_traffic_p in input_json:
+    if input_json[log_traffic_p] not in [ "enabled", "disabled" ]:
+        invalid_attributes.append(invalid_attribute(log_traffic_p, "invalid"))
+
+# output
+
+success = len(invalid_attributes) == 0
+
+if success:
+    output = { "state":"success" }
+else:
+    output = { "type": "NotValid", "message": "validation_failed", "attributes": invalid_attributes }
+
+output_json = simplejson.dumps(output)
+print(output_json)
+
+if not success:
+    sys.exit(1)

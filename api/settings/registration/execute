@@ -27,6 +27,7 @@ import fileinput
 import os
 import tempfile
 import shlex
+import ipaddress
 
 def register(input_json):
     hotspot_id = input_json['hotspotId']
@@ -36,9 +37,20 @@ def register(input_json):
     network_address = input_json['networkAddress']
     hostname = input_json['hostname']
     unit_name = input_json['unitName']
+    dhcp_range_start = input_json['dhcpRangeStart']
+    dhcp_range_end = input_json['dhcpRangeEnd']
+
+    # convert dhcp range values to integer
+    network_ip_string = network_address.split("/")[0]
+    network_int = int(ipaddress.IPv4Address(u'' + network_ip_string))
+    dhcp_range_start_int = int(ipaddress.IPv4Address(u'' + dhcp_range_start))
+    dhcp_range_end_int = int(ipaddress.IPv4Address(u'' + dhcp_range_end))
+
+    config_dhcp_start = dhcp_range_start_int - network_int
+    config_dhcp_end = dhcp_range_end_int - network_int
 
     try:
-        command_args = ['/sbin/e-smith/config', 'setprop', 'dedalo', 'Id', str(hotspot_id), 'Name', hotspot_name, 'Description', unit_description, 'IcaroHost', hostname, 'UnitName', unit_name, 'Network', network_address]
+        command_args = ['/sbin/e-smith/config', 'setprop', 'dedalo', 'Id', str(hotspot_id), 'Name', hotspot_name, 'Description', unit_description, 'IcaroHost', hostname, 'UnitName', unit_name, 'Network', network_address, 'DhcpStart', str(config_dhcp_start), 'DhcpEnd', str(config_dhcp_end)]
         process = subprocess.Popen(command_args, stdout=sys.stdout, stderr=sys.stderr)
         output, error = process.communicate()
     except Exception, e:
