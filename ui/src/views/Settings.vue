@@ -76,9 +76,19 @@
           </div>
           <!-- authenticate button -->
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              <div
+                v-if="loaders.auth"
+                class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+              ></div>
+            </label>
             <div class="col-sm-5">
-              <button class="btn btn-primary" type="submit">{{$t('settings.authenticate')}}</button>
+              <button 
+                class="btn btn-primary" 
+                type="submit"
+                :disabled="loaders.auth"
+              >
+                {{$t('settings.authenticate')}}</button>
             </div>
           </div>
         </form>
@@ -162,10 +172,18 @@
                 tabindex="-1"
                 type="button"
                 class="btn btn-primary"
-                @click="defaultDhcpRange()"
+                @click="btDefaultDhcpRangeClick()"
+                :disabled="loaders.dhcpRange"
               >
-              {{$t('settings.default_dhcp_range')}}
+                {{$t('settings.default_dhcp_range')}}
               </button>
+            </div>
+            <!-- loader default dhcp range -->
+            <div class="col-sm-1 adjust-index">
+              <div
+                v-if="loaders.dhcpRange"
+                class="spinner spinner-sm form-spinner-loader adjust-top-loader no-padding"
+              ></div>
             </div>
           </div>
           <!-- dhcp range start -->
@@ -206,9 +224,20 @@
           </div>
           <!-- register button -->
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              <div
+                v-if="loaders.register"
+                class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+              ></div>
+            </label>
             <div class="col-sm-5">
-              <button class="btn btn-primary" type="submit">{{$t('settings.register')}}</button>
+              <button 
+                class="btn btn-primary" 
+                type="submit"
+                :disabled="loaders.register"
+              >
+                {{$t('settings.register')}}
+              </button>
             </div>
           </div>
         </form>
@@ -266,10 +295,18 @@
                 tabindex="-1"
                 type="button"
                 class="btn btn-primary"
-                @click="defaultDhcpRange()"
+                @click="btDefaultDhcpRangeClick()"
+                :disabled="loaders.dhcpRange"
               >
-              {{$t('settings.default_dhcp_range')}}
+                {{$t('settings.default_dhcp_range')}}
               </button>
+            </div>
+            <!-- loader default dhcp range -->
+            <div class="col-sm-1 adjust-index">
+              <div
+                v-if="loaders.dhcpRange"
+                class="spinner spinner-sm form-spinner-loader adjust-top-loader no-padding"
+              ></div>
             </div>
           </div>
           <!-- dhcp range start -->
@@ -308,50 +345,81 @@
               </span>
             </div>
           </div>
+          <!-- save button -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">
+              <div
+                v-if="loaders.save"
+                class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+              ></div>
+            </label>
+            <div class="col-sm-5">
+              <button 
+                class="btn btn-primary" 
+                type="submit"
+                :disabled="loaders.save"
+              >
+                {{$t('save')}}
+              </button>
+            </div>
+          </div>
 
           <div class="divider" v-if="proxyStatus === 'enabled'"></div>
           <h3 v-if="proxyStatus === 'enabled'">{{$t('settings.proxy')}}</h3>
 
           <!-- proxy -->
-          <div class="form-group" :class="{ 'has-error': showErrorProxy }" v-if="proxyStatus === 'enabled'">
-            <label
-              class="col-sm-2 control-label"
-              for="textInput-modal-markup"
-            >{{$t('settings.enable_transparent_proxy_on_hotspot')}}</label>
-            <div class="col-sm-5">
-              <toggle-button
-                class="min-toggle"
-                :width="40"
-                :height="20"
-                :color="{checked: '#0088ce', unchecked: '#bbbbbb'}"
-                :value="dedaloConfig.Proxy === 'enabled'"
-                :sync="true"
-                @change="toggleProxy()"
-              />
-              <span class="help-block" v-if="showErrorProxy">{{$t('settings.proxy_validation')}}</span>
+          <div v-if="proxyStatus === 'enabled'">
+            <div class="form-group" :class="{ 'has-error': showErrorProxy }">
+              <label
+                class="col-sm-2 control-label"
+                for="textInput-modal-markup"
+              >{{$t('settings.enable_transparent_proxy_on_hotspot')}}</label>
+              <div class="col-sm-5">
+                <toggle-button
+                  class="min-toggle"
+                  :width="40"
+                  :height="20"
+                  :color="{checked: '#0088ce', unchecked: '#bbbbbb'}"
+                  :value="dedaloConfig.Proxy === 'enabled'"
+                  :sync="true"
+                  @change="toggleProxy()"
+                />
+                <span class="help-block" v-if="showErrorProxy">{{$t('settings.proxy_validation')}}</span>
+              </div>
             </div>
-          </div>
-          <!-- proxy - log traffic -->
-          <div class="form-group" v-if="dedaloConfig.Proxy === 'enabled' && proxyStatus === 'enabled'" :class="{ 'has-error': showErrorLogTraffic }">
-            <label
-              class="col-sm-2 control-label"
-              for="textInput-modal-markup"
-            >{{$t('settings.log_traffic')}}</label>
-            <div class="col-sm-5">
-              <input
-                @click="toggleLogTraffic()"
-                v-model="logTraffic"
-                type="checkbox"
-                class="form-control"
-              >
-              <span class="help-block" v-if="showErrorLogTraffic">{{$t('settings.log_traffic_validation')}}</span>
+            <!-- proxy - log traffic -->
+            <div class="form-group" v-if="dedaloConfig.Proxy === 'enabled'" :class="{ 'has-error': showErrorLogTraffic }">
+              <label
+                class="col-sm-2 control-label"
+                for="textInput-modal-markup"
+              >{{$t('settings.log_traffic')}}</label>
+              <div class="col-sm-5">
+                <input
+                  @click="toggleLogTraffic()"
+                  v-model="logTraffic"
+                  type="checkbox"
+                  class="form-control"
+                >
+                <span class="help-block" v-if="showErrorLogTraffic">{{$t('settings.log_traffic_validation')}}</span>
+              </div>
             </div>
-          </div>
-          <!-- save button -->
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="textInput-modal-markup"></label>
-            <div class="col-sm-5">
-              <button class="btn btn-primary" type="submit">{{$t('save')}}</button>
+            <!-- save button -->
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="textInput-modal-markup">
+                <div
+                  v-if="loaders.save"
+                  class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+                ></div>
+              </label>
+              <div class="col-sm-5">
+                <button 
+                  class="btn btn-primary" 
+                  type="submit"
+                  :disabled="loaders.save"
+                >
+                  {{$t('save')}}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -433,7 +501,13 @@ export default {
       dhcpRangeStart: "",
       dhcpRangeEnd: "",
       errorDhcpRangeStart: "",
-      errorDhcpRangeEnd: ""
+      errorDhcpRangeEnd: "",
+      loaders: {
+        auth: false,
+        register: false,
+        save: false,
+        dhcpRange: false
+      }
     }
   },
   methods: {
@@ -496,6 +570,7 @@ export default {
       this.showErrorUsername = false;
       this.showErrorPassword = false;
       this.errorMessage = null;
+      this.loaders.auth = true;
 
       var authObj = {
         "action": "authenticate",
@@ -503,7 +578,7 @@ export default {
         "username": this.username,
         "password": this.password
       }
-      var ctx = this;      
+      var ctx = this;
       nethserver.exec(
         ["nethserver-dedalo/authentication/validate"],
         authObj,
@@ -540,6 +615,7 @@ export default {
         },
         function(error) {
           ctx.showErrorMessage(ctx.$i18n.t("settings.authentication_error"), error)
+          ctx.loaders.auth = false;
         }
       );
     },
@@ -559,12 +635,15 @@ export default {
         },
         function(error) {
           ctx.showErrorMessage(ctx.$i18n.t("settings.error_saving_token_to_file"), error)
+          ctx.loaders.auth = false;
         }
       );
     },
     authenticationSuccess() {
       this.authenticated = true
       this.uiLoaded = false;
+      this.loaders.auth = false;
+
       // retrieve hotspot list
       var jsonObj = {
         "appInfo": "hotspots",
@@ -600,6 +679,7 @@ export default {
           this.showErrorPassword = true;
         }
       }
+      this.loaders.auth = false;
     },
     readHotspotsSuccess(hotspotsOutput) {
       this.hotspotsLoaded(hotspotsOutput)
@@ -696,6 +776,7 @@ export default {
       this.showErrorNetworkAddress = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
+      this.loaders.register = true;
 
       var registerObjValidate = {
         "hotspotId": this.hotspotList[this.selectedHotspotIndex].id,
@@ -742,6 +823,7 @@ export default {
           this.errorDhcpRangeEnd = attr.error;
         }
       }
+      this.loaders.register = false;
     },
     registrationValidationSuccess(registerObjValidate) {
       this.uiLoaded = false
@@ -774,10 +856,12 @@ export default {
         },
         function(error) {
           console.error(error)  /* eslint-disable-line no-console */
+          ctx.loaders.register = false;
         }
       );
     },
     registrationSuccess() {
+      this.loaders.register = false;
       this.registered = true
       this.oldNetworkDevice = this.networkDevice
       var ctx = this;
@@ -803,8 +887,8 @@ export default {
       this.showErrorLogTraffic = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
-      this.warningMessage = null
-
+      this.warningMessage = null;
+      this.loaders.save = true;
       var networkDeviceObj = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
 
       var configObjValidate = {
@@ -830,6 +914,7 @@ export default {
       );
     },
     configurationValidationSuccess(configObjValidate) {
+      this.uiLoaded = false
       nethserver.notifications.success = this.$i18n.t("settings.configuration_update_successful");
       nethserver.notifications.error = this.$i18n.t("settings.configuration_update_failed");
 
@@ -845,6 +930,7 @@ export default {
         },
         function(error) {
           console.error(error)  /* eslint-disable-line no-console */
+          ctx.loaders.save = false;
         }
       );
     },
@@ -871,8 +957,11 @@ export default {
           this.errorDhcpRangeEnd = attr.error;
         }
       }
+      this.loaders.save = false;
     },
     configurationUpdateSuccess() {
+      this.loaders.save = false;
+
       if (this.networkDevice != this.oldNetworkDevice) {
         this.unregisterAndRegister()
       } else {
@@ -1040,7 +1129,12 @@ export default {
         this.warningMessage = this.$i18n.t("settings.warning_hotspot_device_ip_address")
       }
     },
-    defaultDhcpRange() {
+    btDefaultDhcpRangeClick() {
+      this.showErrorNetworkAddress = false;
+      this.showErrorDhcpRangeStart = false;
+      this.showErrorDhcpRangeEnd = false;
+      this.loaders.dhcpRange = true;
+
       var dhcpRangeObj = {
         "appInfo": "dhcpRange",
         "networkAddress": this.dedaloConfig.Network
@@ -1055,9 +1149,11 @@ export default {
           var dhcpRange = dhcpRangeOutput.dhcpRange
           ctx.dhcpRangeStart = dhcpRange.start
           ctx.dhcpRangeEnd = dhcpRange.end
+          ctx.loaders.dhcpRange = false;
         },
         function(error) {
-          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_range_dhcp"), error)
+          ctx.showErrorNetworkAddress = true;
+          ctx.loaders.dhcpRange = false;
         }
       );
     }
@@ -1068,5 +1164,13 @@ export default {
 <style scoped>
 .margin-top-20 {
   margin-top: 20px
+}
+
+.no-padding {
+  padding: 0px
+}
+
+.adjust-top-loader {
+    margin-top: -4px;
 }
 </style>

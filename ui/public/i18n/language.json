@@ -49,9 +49,9 @@
         "dhcp_range_start": "DHCP range start",
         "dhcp_range_end": "DHCP range end",
         "dhcp_range_start_validation": "DHCP range start must be a valid IP address",
-        "dhcp_range_start_validation_invalid_range": "DHCP range start is out of range",
+        "dhcp_range_start_validation_invalid_range": "Address out of range",
         "dhcp_range_end_validation": "DHCP range end must be a valid IP address",
-        "dhcp_range_end_validation_invalid_range": "DHCP range end is out of range",
+        "dhcp_range_end_validation_invalid_range": "Address out of range",
         "default_dhcp_range": "Default DHCP range"
     },
     "about": {
