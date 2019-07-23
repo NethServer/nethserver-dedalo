@@ -34,6 +34,9 @@
       $hs_allow_origins = "*";
   }
 
+  our $hs_dhcp_start = $dedalo{'DhcpStart'} || '';
+  our $hs_dhcp_end = $dedalo{'DhcpEnd'} || '';
+
   return '';
 }
 HS_INTERFACE="{{$hs_interface}}"
@@ -47,3 +50,5 @@ HS_UNIT_DESC="{{$hs_unit_desc}}"
 HS_UUID="{{$hs_uuid}}"
 HS_SECRET="{{$hs_secret}}"
 HS_ALLOW_ORIGINS="{{$hs_allow_origins}}"
+HS_DHCPSTART="{{$hs_dhcp_start}}"
+HS_DHCPEND="{{$hs_dhcp_end}}"

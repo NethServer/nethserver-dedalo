@@ -43,7 +43,16 @@
         "error_retrieving_proxy_status": "Error retrieving proxy status",
         "hotspot": "Hotspot",
         "proxy": "Proxy",
-        "no_network_device_found": "No network devices found. There must be at least a network device with role empty or 'hotspot'"
+        "no_network_device_found": "No network devices found. There must be at least a network device with role empty or 'hotspot'",
+        "warning_hotspot_device_ip_address": "Warning: selecting this device will reboot the network",
+        "error_retrieving_range_dhcp": "Error retrieving DHCP range addresses",
+        "dhcp_range_start": "DHCP range start",
+        "dhcp_range_end": "DHCP range end",
+        "dhcp_range_start_validation": "DHCP range start must be a valid IP address",
+        "dhcp_range_start_validation_invalid_range": "DHCP range start is out of range",
+        "dhcp_range_end_validation": "DHCP range end must be a valid IP address",
+        "dhcp_range_end_validation_invalid_range": "DHCP range end is out of range",
+        "default_dhcp_range": "Default DHCP range"
     },
     "about": {
         "title": "About",
@@ -80,7 +89,9 @@
         "no_user_connected": "No user connected"
     },
     "docs": {
-        "network_address": "Hotspot users will get an IP address from this network"
+        "network_address": "Hotspot users will get an IP address from this network",
+        "dhcp_range_start": "First address available for hotspot users",
+        "dhcp_range_end": "Last address available for hotspot users"
     },
     "are_you_sure": "Are you sure",
     "save": "Save",

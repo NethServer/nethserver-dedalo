@@ -26,6 +26,7 @@ import subprocess
 import simplejson
 import tempfile
 import socket
+import ipaddress
 
 def read_network_devices():
     bash_command = "/sbin/e-smith/db networks getjson"
@@ -38,15 +39,19 @@ def read_network_devices():
     for elem in db_networks:
         if elem["type"] in device_types:
             # return only devices with role "hotspot" or empty
-            if elem["props"]["role"] == "hotspot" or (not elem["props"]["role"]):
+            if "role" in elem["props"] and (elem["props"]["role"] == "hotspot" or (not elem["props"]["role"])):
                 name = elem["name"]
+                ip_address = ""
 
                 if elem["props"]["role"] == "hotspot":
                     hotspot_assigned = True
                 else:
                     hotspot_assigned = False
+
+                if "ipaddr" in elem["props"]:
+                    ip_address = elem["props"]["ipaddr"]
                 
-                network_device = { "name": name, "hotspot_assigned": hotspot_assigned }
+                network_device = { "name": name, "hotspot_assigned": hotspot_assigned, "ip_address": ip_address }
                 network_devices.append(network_device)
     
     return network_devices
@@ -70,6 +75,29 @@ def read_hotspots(token, hostname):
             else:
                 return { "hotspots": outputJson }
 
+def get_dhcp_range(network_address, dhcp_start=None, dhcp_end=None):
+    network = ipaddress.ip_network(u''+network_address)
+
+    if dhcp_start is not None:
+        # dhcp range is present in configuration
+        network_ip_string = network_address.split("/")[0]
+        network_int = int(ipaddress.IPv4Address(u'' + network_ip_string))
+        dhcp_range_start_int = network_int + int(dhcp_start)
+        dhcp_range_end_int = network_int + int(dhcp_end)
+
+        dhcp_range_start = str(ipaddress.IPv4Address(dhcp_range_start_int))
+        dhcp_range_end = str(ipaddress.IPv4Address(dhcp_range_end_int))
+        return { "start": dhcp_range_start, "end": dhcp_range_end }
+    else:
+        # dhcp range not present in configuration, using default
+        hosts = list(network.hosts())
+        first, last = str(hosts[0]), str(hosts[-1])
+
+        # first address is reserved for hotspot
+        firstClient = int(ipaddress.IPv4Address(u'' + first)) + 1
+        first = str(ipaddress.IPv4Address(firstClient))
+        return { "start": first, "end": last }
+
 try:
     line = fileinput.input()[0].rstrip()
     input_json = simplejson.loads(line)
@@ -91,6 +119,18 @@ try:
         print (output)
     elif app_info == 'hostname':
         output = simplejson.dumps({'hostname': socket.gethostname()})
+        print (output)
+    elif app_info == 'dhcpRange':
+        network_address = input_json["networkAddress"]
+
+        if "dhcpStart" in input_json:
+            dhcp_start = input_json['dhcpStart']
+            dhcp_end = input_json['dhcpEnd']
+            dhcp_range = get_dhcp_range(network_address, dhcp_start=dhcp_start, dhcp_end=dhcp_end)
+        else:
+            dhcp_range = get_dhcp_range(network_address)
+
+        output = simplejson.dumps({'dhcpRange': dhcp_range})
         print (output)
 except Exception, e:
     print simplejson.dumps({ 'error': "%s" % e })
