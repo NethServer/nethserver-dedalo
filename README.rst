@@ -625,7 +625,6 @@ Input
 - ``proxy``: proxy status, can be ``enabled`` or ``disabled``
 - ``logTraffic``: ``enabled`` if hotspot traffic should be logged while using proxy, else ``disabled``
 - ``device``: a network interface with role "hotspot" or empty
-- ``ipAddress``: IP address currently assigned to ``device`` interface (empty string if no address is assigned)
 - ``dhcpRangeStart``: first IP address to assign to hotspot users
 - ``dhcpRangeEnd``: last IP address to assign to hotspot users
 
