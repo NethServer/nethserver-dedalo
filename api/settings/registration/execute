@@ -56,7 +56,7 @@ def register(input_json):
     except Exception, e:
         return "Error setting props: %s" % e
 
-    # release hotspot role for all devices
+    # release hotspot role for not selected devices
     try:
         bash_command = "/sbin/e-smith/db networks getjson"
         process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
@@ -65,19 +65,20 @@ def register(input_json):
         return "Error retrieving db networks: %s" % e
 
     networks_json = simplejson.loads(output)
-    hotspot_networks_to_reset = []
+    role_reset = False
 
     for network in networks_json:
         if 'role' in network['props'] and network['props']['role'] == 'hotspot':
-            hotspot_networks_to_reset.append(network['name'])
+            # reset only not selected devices
+            if network['name'] != network_device:
+                role_reset = True
 
-    for network in hotspot_networks_to_reset:
-        try:
-            bash_command = "/sbin/e-smith/db 'networks' 'setprop' '%s' 'role' '' " % network
-            process = subprocess.Popen(shlex.split(bash_command), stdout=sys.stdout, stderr=sys.stderr)
-            output, error = process.communicate()
-        except Exception, e:
-            return "Error releasing hotspot role for network %s: %s" % (network, e)
+                try:
+                    command_args = ['/sbin/e-smith/db', 'networks', 'set', network['name'], network['type'], 'role', '']
+                    process = subprocess.Popen(command_args, stdout=sys.stdout, stderr=sys.stderr)
+                    output, error = process.communicate()
+                except Exception, e:
+                    return "Error releasing hotspot role for network %s: %s" % (network['name'], e)
 
     # set hotspot role for selected device
     try:
@@ -86,6 +87,27 @@ def register(input_json):
         output, error = process.communicate()
     except Exception, e:
         return "Error setting hotspot role for network %s: %s" % (network, e)
+
+    # perform interface-update if selected device is not physical, or at least an interface role has been removed (role_reset = True)
+    try:
+        bash_command = "/sbin/e-smith/db networks gettype %s" % network_device
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        return_code = process.returncode
+
+        if return_code != 0:
+            return "Event failed, see /var/log/messages"
+
+        if output.rstrip() != "ethernet" or role_reset:
+            bash_command = "/sbin/e-smith/signal-event -j interface-update"
+            process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+            output, error = process.communicate()
+            return_code = process.returncode
+
+            if return_code != 0:
+                return "Event failed, see /var/log/messages"
+    except Exception, e:
+        return "Event failed, see /var/log/messages: %s" % e
 
     token_json = None
 

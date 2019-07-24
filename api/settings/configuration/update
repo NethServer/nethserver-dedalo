@@ -97,18 +97,6 @@ def update(input_json):
     except Exception, e:
         return "Error setting hotspot role for network %s: %s" % (network, e)
 
-    if ip_address:
-        try:
-            bash_command = "/sbin/e-smith/signal-event -j interface-update"
-            process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
-            output, error = process.communicate()
-            return_code = process.returncode
-
-            if return_code != 0:
-                return "Event failed, see /var/log/messages"
-        except Exception, e:
-            return "Event failed, see /var/log/messages: %s" % e
-
     # nethserver-dedalo-save
     try:
         bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-save"

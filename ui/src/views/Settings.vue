@@ -104,11 +104,11 @@
               for="textInput-modal-markup"
             >{{$t('settings.parent_hotspot')}}</label>
             <div class="col-sm-5">
-              <select required type="text" class="combobox form-control" v-model="selectedHotspotIndex">
+              <select required type="text" class="combobox form-control" v-model="selectedHotspot">
                 <option
                   v-for="(hotspot, index) in hotspotList"
                   v-bind:key="index"
-                  :value="index"
+                  :value="hotspot.name"
                 >{{ hotspot.name }} ({{ hotspot.description }})</option>
               </select>
               <span class="help-block" v-if="showErrorHotspot">{{$t('settings.hotspot_validation')}}</span>
@@ -254,7 +254,7 @@
               for="textInput-modal-markup"
             >{{$t('settings.parent_hotspot')}}</label>
             <div class="col-sm-5">
-              <input type="input" class="form-control" v-model="hotspotList[selectedHotspotIndex].name" required disabled>
+              <input type="input" class="form-control" v-model="selectedHotspot" required disabled>
             </div>
           </div>
           <!-- network device -->
@@ -480,7 +480,7 @@ export default {
       showErrorHostname: false,
       showErrorUsername: false,
       showErrorPassword: false,
-      selectedHotspotIndex: 0,
+      selectedHotspot: "",
       hotspotList: [],
       networkDevice: "",
       networkDeviceList: [],
@@ -776,10 +776,12 @@ export default {
       this.showErrorNetworkAddress = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
+      this.warningMessage = null;
       this.loaders.register = true;
+      var hotspotId = this.hotspotList.find(hotspot => hotspot.name === this.selectedHotspot).id;
 
       var registerObjValidate = {
-        "hotspotId": this.hotspotList[this.selectedHotspotIndex].id,
+        "hotspotId": hotspotId,
         "unitDescription": this.dedaloConfig.Description,
         "networkDevice": this.networkDevice,
         "networkAddress": this.dedaloConfig.Network,
@@ -833,7 +835,7 @@ export default {
       var registerObjExecute = {
         "action": "register",
         "hotspotId": registerObjValidate.hotspotId,
-        "hotspotName": this.hotspotList[this.selectedHotspotIndex].name,
+        "hotspotName": this.selectedHotspot,
         "unitDescription": registerObjValidate.unitDescription,
         "networkDevice": registerObjValidate.networkDevice,
         "networkAddress": registerObjValidate.networkAddress,
@@ -969,7 +971,7 @@ export default {
       }
     },
     unregisterAndRegister() {
-      // unregister unit with old network address
+      // unregister unit with old network device
       nethserver.notifications.success = this.$i18n.t("settings.unregister_successful");
       nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
 
@@ -985,14 +987,15 @@ export default {
           console.info("dedalo-unregister", stream); /* eslint-disable-line no-console */
         },
         function(success) {
-          // re-register unit with new network address
+          // re-register unit with new network device
           nethserver.notifications.success = ctx.$i18n.t("settings.registration_successful");
           nethserver.notifications.error = ctx.$i18n.t("settings.registration_failed");
+          var hotspotId = ctx.hotspotList.find(hotspot => hotspot.name === ctx.selectedHotspot).id;
 
           var registerObjExecute = {
             "action": "register",
-            "hotspotId": ctx.hotspotList[ctx.selectedHotspotIndex].id,
-            "hotspotName": ctx.hotspotList[ctx.selectedHotspotIndex].name,
+            "hotspotId": hotspotId,
+            "hotspotName": ctx.selectedHotspot,
             "unitDescription": ctx.dedaloConfig.Description,
             "networkDevice": ctx.networkDevice,
             "networkAddress": ctx.dedaloConfig.Network,
@@ -1026,6 +1029,7 @@ export default {
     unregister() {
       $("#unregisterModal").modal("hide");
       this.uiLoaded = false
+      this.warningMessage = null
       nethserver.notifications.success = this.$i18n.t("settings.unregister_successful");
       nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
 
@@ -1081,7 +1085,7 @@ export default {
 
       var device = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
 
-      if (device.hotspot_assigned && device.ip_address) {
+      if (device.type != "ethernet") {
         this.warningMessage = this.$i18n.t("settings.warning_hotspot_device_ip_address")
       }
 
@@ -1096,9 +1100,10 @@ export default {
         this.hotspotList.push(hotspot)
       }
 
-      if (!this.selectedHotspotIndex) {
-        // select the first hotspot by default
-        this.selectedHotspotIndex = 0
+      if (this.dedaloConfig.Name) {
+        this.selectedHotspot = this.dedaloConfig.Name
+      } else {
+        this.selectedHotspot = this.hotspotList[0].name
       }
     },
     toggleProxy() {
@@ -1125,7 +1130,7 @@ export default {
       this.warningMessage = null
       var device = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
 
-      if (device.hotspot_assigned && device.ip_address) {
+      if (device.type != "ethernet") {
         this.warningMessage = this.$i18n.t("settings.warning_hotspot_device_ip_address")
       }
     },
