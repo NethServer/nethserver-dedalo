@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.1.1
+Version: 1.2.0
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -45,6 +45,9 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Thu Jul 25 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.0-1
+- Dedalo Cockpit UI - NethServer/dev#5790
+
 * Mon Jul 22 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.1-1
 - Dedalo: corrupted squid access log - Bug NethServer/dev#5792
 
