@@ -91,6 +91,20 @@
                 {{$t('settings.authenticate')}}</button>
             </div>
           </div>
+
+          <!-- read only settings -->
+          <div v-if="dedaloConfig.Id">
+            <div class="divider margin-top-bottom-25"></div>
+
+            <div class="alert alert-info">
+              <span class="pficon pficon-info"></span>
+              {{$t('settings.authenticate_to_edit_configuration')}}.
+            </div>
+            <pre class="prettyprint">
+{{$t('settings.dedalo_configuration')}}:
+{{ dedaloConfig }}
+            </pre>
+          </div>
         </form>
       </div>
 
@@ -255,6 +269,16 @@
             >{{$t('settings.parent_hotspot')}}</label>
             <div class="col-sm-5">
               <input type="input" class="form-control" v-model="selectedHotspot" required disabled>
+            </div>
+          </div>
+          <!-- unit description -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.unit_description')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.Description" disabled>
             </div>
           </div>
           <!-- network device -->
@@ -1177,5 +1201,10 @@ export default {
 
 .adjust-top-loader {
     margin-top: -4px;
+}
+
+.margin-top-bottom-25 {
+  margin-top: 25px;
+  margin-bottom: 25px;
 }
 </style>
