@@ -3,19 +3,13 @@
     <h1>{{$t('settings.title')}}</h1>
     
     <!-- error message -->
-    <div v-if="errorMessage" class="alert alert-danger alert-dismissable">
-      <button type="button" class="close" @click="closeErrorMessage()" aria-label="Close">
-        <span class="pficon pficon-close"></span>
-      </button>
+    <div v-if="errorMessage" class="alert alert-danger">
       <span class="pficon pficon-error-circle-o"></span>
       {{ errorMessage }}.
     </div>
 
     <!-- warning message -->
-    <div v-if="warningMessage" class="alert alert-warning alert-dismissable">
-      <button type="button" class="close" @click="closeWarningMessage()" aria-label="Close">
-        <span class="pficon pficon-close"></span>
-      </button>
+    <div v-if="warningMessage" class="alert alert-warning">
       <span class="pficon pficon-warning-triangle-o"></span>
       {{ warningMessage }}.
     </div>
@@ -585,6 +579,7 @@ export default {
     showErrorMessage(errorMessage, error) {
       console.error(errorMessage, error) /* eslint-disable-line no-console */
       this.errorMessage = errorMessage
+      this.uiLoaded = true
     },
     togglePasswordVisibility() {
       this.passwordVisible = !this.passwordVisible;
@@ -800,6 +795,7 @@ export default {
       this.showErrorNetworkAddress = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
+      this.errorMessage = null;
       this.warningMessage = null;
       this.loaders.register = true;
       var hotspotId = this.hotspotList.find(hotspot => hotspot.name === this.selectedHotspot).id;
@@ -913,6 +909,7 @@ export default {
       this.showErrorLogTraffic = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
+      this.errorMessage = null;
       this.warningMessage = null;
       this.loaders.save = true;
       var networkDeviceObj = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
@@ -1053,6 +1050,7 @@ export default {
     unregister() {
       $("#unregisterModal").modal("hide");
       this.uiLoaded = false
+      this.errorMessage = null
       this.warningMessage = null
       nethserver.notifications.success = this.$i18n.t("settings.unregister_successful");
       nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
@@ -1143,12 +1141,6 @@ export default {
       } else {
         this.dedaloConfig.LogTraffic = "enabled"
       }
-    },
-    closeErrorMessage() {
-      this.errorMessage = null
-    },
-    closeWarningMessage() {
-      this.warningMessage = null
     },
     changedNetworkDevice() {
       this.warningMessage = null
