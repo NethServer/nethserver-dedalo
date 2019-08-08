@@ -54,7 +54,8 @@
         "dhcp_range_end_validation_invalid_range": "Address out of range",
         "default_dhcp_range": "Default DHCP range",
         "authenticate_to_edit_configuration": "Please authenticate to edit hotspot configuration",
-        "dedalo_configuration": "Dedalo configuration"
+        "hotspot_configuration": "Hotspot configuration",
+        "login": "Login"
     },
     "about": {
         "title": "About",
