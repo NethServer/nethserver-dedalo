@@ -3,19 +3,13 @@
     <h1>{{$t('settings.title')}}</h1>
     
     <!-- error message -->
-    <div v-if="errorMessage" class="alert alert-danger alert-dismissable">
-      <button type="button" class="close" @click="closeErrorMessage()" aria-label="Close">
-        <span class="pficon pficon-close"></span>
-      </button>
+    <div v-if="errorMessage" class="alert alert-danger">
       <span class="pficon pficon-error-circle-o"></span>
       {{ errorMessage }}.
     </div>
 
     <!-- warning message -->
-    <div v-if="warningMessage" class="alert alert-warning alert-dismissable">
-      <button type="button" class="close" @click="closeWarningMessage()" aria-label="Close">
-        <span class="pficon pficon-close"></span>
-      </button>
+    <div v-if="warningMessage" class="alert alert-warning">
       <span class="pficon pficon-warning-triangle-o"></span>
       {{ warningMessage }}.
     </div>
@@ -24,6 +18,7 @@
     <div v-if="uiLoaded">
       <!-- authentication form -->
       <div v-if="!authenticated">
+        <h3>{{$t('settings.login')}}</h3>
         <form class="form-horizontal" v-on:submit.prevent="btAuthenticateClick">
           <!-- hostname -->
           <div class="form-group" :class="{ 'has-error': showErrorHostname }">
@@ -90,6 +85,102 @@
               >
                 {{$t('settings.authenticate')}}</button>
             </div>
+          </div>
+
+          <!-- read only settings -->
+          <div v-if="dedaloConfig.Id">
+            <h3>{{$t('settings.hotspot_configuration')}}</h3>
+            <div class="alert alert-info">
+              <span class="pficon pficon-info"></span>
+              {{$t('settings.authenticate_to_edit_configuration')}}.
+            </div>
+            <form class="form-horizontal">
+              <!-- hotspot -->
+              <div class="form-group">
+                <label
+                  class="col-sm-2 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('settings.parent_hotspot')}}</label>
+                <div class="col-sm-5">
+                  <input type="input" class="form-control" v-model="dedaloConfig.Name" required disabled>
+                </div>
+              </div>
+              <!-- unit name -->
+              <div class="form-group">
+                <label
+                  class="col-sm-2 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('settings.unit_name')}}</label>
+                <div class="col-sm-5">
+                  <input type="input" class="form-control" v-model="dedaloConfig.UnitName" required disabled>
+                </div>
+              </div>
+              <!-- unit description -->
+              <div class="form-group">
+                <label
+                  class="col-sm-2 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('settings.unit_description')}}</label>
+                <div class="col-sm-5">
+                  <input type="input" class="form-control" v-model="dedaloConfig.Description" disabled>
+                </div>
+              </div>
+              <!-- network device -->
+              <div class="form-group">
+                <label
+                  class="col-sm-2 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('settings.network_device')}}</label>
+                <div class="col-sm-5">
+                  <input type="input" class="form-control" v-model="networkDevice" disabled>
+                </div>
+              </div>
+              <!-- network address -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="textInput-modal-markup">
+                  {{$t('settings.network_address')}}
+                  <doc-info
+                    :placement="'top'"
+                    :title="$t('settings.network_address')"
+                    :chapter="'network_address'"
+                    :inline="true"
+                  ></doc-info>
+                </label>
+                <div class="col-sm-3">
+                  <input type="input" required class="form-control" v-model="dedaloConfig.Network" disabled>
+                </div>
+              </div>
+              <!-- dhcp range start -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="textInput-modal-markup">
+                  {{$t('settings.dhcp_range_start')}}
+                  <doc-info
+                    :placement="'top'"
+                    :title="$t('settings.dhcp_range_start')"
+                    :chapter="'dhcp_range_start'"
+                    :inline="true"
+                  ></doc-info>
+                </label>
+                <div class="col-sm-3">
+                  <input type="input" required class="form-control" v-model="dhcpRangeStart" disabled>
+                </div>
+              </div>
+              <!-- dhcp range end -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="textInput-modal-markup">
+                  {{$t('settings.dhcp_range_end')}}
+                  <doc-info
+                    :placement="'top'"
+                    :title="$t('settings.dhcp_range_end')"
+                    :chapter="'dhcp_range_end'"
+                    :inline="true"
+                  ></doc-info>
+                </label>
+                <div class="col-sm-3">
+                  <input type="input" required class="form-control" v-model="dhcpRangeEnd" disabled>
+                </div>
+              </div>
+            </form>
           </div>
         </form>
       </div>
@@ -255,6 +346,26 @@
             >{{$t('settings.parent_hotspot')}}</label>
             <div class="col-sm-5">
               <input type="input" class="form-control" v-model="selectedHotspot" required disabled>
+            </div>
+          </div>
+          <!-- unit name -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.unit_name')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.UnitName" required disabled>
+            </div>
+          </div>
+          <!-- unit description -->
+          <div class="form-group">
+            <label
+              class="col-sm-2 control-label"
+              for="textInput-modal-markup"
+            >{{$t('settings.unit_description')}}</label>
+            <div class="col-sm-5">
+              <input type="input" class="form-control" v-model="dedaloConfig.Description" disabled>
             </div>
           </div>
           <!-- network device -->
@@ -550,7 +661,7 @@ export default {
           if (ctx.token) {
             ctx.authenticationSuccess()
           } else {
-            ctx.uiLoaded = true
+            ctx.getNetworkDevicesNoAuth()
           }
         },
         function(error) {
@@ -558,9 +669,74 @@ export default {
         }
       );
     },
+    getNetworkDevicesNoAuth() {
+      var jsonObj = {
+        "appInfo": "networkDevices"
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/read"],
+        jsonObj,
+        null,
+        function(success) {
+          var networkDevicesOutput = JSON.parse(success);
+          ctx.networkDevicesNoAuthSuccess(networkDevicesOutput)
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_network_devices"), error)
+        }
+      );
+    },
+    networkDevicesNoAuthSuccess(networkDevicesOutput) {
+      var networkDevices = networkDevicesOutput.networkDevices
+
+      for (var networkDevice of networkDevices) {
+        if (networkDevice.hotspot_assigned) {
+          this.networkDevice = networkDevice.name
+        }
+      }
+      // retrieve dhcp range
+      var dhcpRangeObj;
+
+      if (this.dedaloConfig.DhcpStart) {
+        // dhcp range is present in configuration
+        dhcpRangeObj = {
+          "appInfo": "dhcpRange",
+          "dhcpStart": this.dedaloConfig.DhcpStart,
+          "dhcpEnd": this.dedaloConfig.DhcpEnd,
+          "networkAddress": this.dedaloConfig.Network
+        }
+      } else {
+        // dhcp range not present in configuration
+        dhcpRangeObj = {
+          "appInfo": "dhcpRange",
+          "networkAddress": this.dedaloConfig.Network
+        }
+      }
+      var ctx = this;
+      nethserver.exec(
+        ["nethserver-dedalo/settings/registration/read"],
+        dhcpRangeObj,
+        null,
+        function(success) {
+          var dhcpRangeOutput = JSON.parse(success);
+          ctx.dhcpRangeSuccessNoAuth(dhcpRangeOutput)
+        },
+        function(error) {
+          ctx.showErrorMessage(ctx.$i18n.t("settings.error_retrieving_range_dhcp"), error)
+        }
+      );
+    },
+    dhcpRangeSuccessNoAuth(dhcpRangeOutput) {
+      var dhcpRange = dhcpRangeOutput.dhcpRange
+      this.dhcpRangeStart = dhcpRange.start
+      this.dhcpRangeEnd = dhcpRange.end
+      this.uiLoaded = true
+    },
     showErrorMessage(errorMessage, error) {
       console.error(errorMessage, error) /* eslint-disable-line no-console */
       this.errorMessage = errorMessage
+      this.uiLoaded = true
     },
     togglePasswordVisibility() {
       this.passwordVisible = !this.passwordVisible;
@@ -776,6 +952,7 @@ export default {
       this.showErrorNetworkAddress = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
+      this.errorMessage = null;
       this.warningMessage = null;
       this.loaders.register = true;
       var hotspotId = this.hotspotList.find(hotspot => hotspot.name === this.selectedHotspot).id;
@@ -889,6 +1066,7 @@ export default {
       this.showErrorLogTraffic = false;
       this.showErrorDhcpRangeStart = false;
       this.showErrorDhcpRangeEnd = false;
+      this.errorMessage = null;
       this.warningMessage = null;
       this.loaders.save = true;
       var networkDeviceObj = this.networkDeviceList.find(dev => dev.name === this.networkDevice);
@@ -1029,6 +1207,7 @@ export default {
     unregister() {
       $("#unregisterModal").modal("hide");
       this.uiLoaded = false
+      this.errorMessage = null
       this.warningMessage = null
       nethserver.notifications.success = this.$i18n.t("settings.unregister_successful");
       nethserver.notifications.error = this.$i18n.t("settings.unregister_failed");
@@ -1119,12 +1298,6 @@ export default {
       } else {
         this.dedaloConfig.LogTraffic = "enabled"
       }
-    },
-    closeErrorMessage() {
-      this.errorMessage = null
-    },
-    closeWarningMessage() {
-      this.warningMessage = null
     },
     changedNetworkDevice() {
       this.warningMessage = null
