@@ -7,7 +7,7 @@
     "homepage": "https://github.com/NethServer/nethserver-dedalo",
     "provides": ["nethserver-dedalo"],
     "release": {
-        "version": "1.0.0"
+        "version": "_RELEASE_"
     },
     "tags": ["hotspot", "icaro", "nethserver"],
     "license": "GPL-3.0",

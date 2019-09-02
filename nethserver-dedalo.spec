@@ -22,6 +22,7 @@ Dedalo captive portal based on CoovaChilli
 %build
 %{makedocs}
 perl createlinks
+sed -i 's/_RELEASE_/%{version}/' %{name}.json
 mkdir -p root%{perl_vendorlib}
 mv -v NethServer root%{perl_vendorlib}
 
