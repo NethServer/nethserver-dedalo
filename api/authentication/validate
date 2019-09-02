@@ -27,7 +27,7 @@ $data = readInput();
 $validator = new LegacyValidator($data);
 
 $validator->declareParameter('hostname', Validate::HOSTADDRESS);
-$validator->declareParameter('username', Validate::USERNAME);
+$validator->declareParameter('username', Validate::NOTEMPTY);
 $validator->declareParameter('password', Validate::NOTEMPTY);
 
 # Validate the input
