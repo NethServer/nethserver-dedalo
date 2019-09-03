@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.2.0
+Version: 1.2.1
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -46,6 +46,10 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Tue Sep 03 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.1-1
+- Cockpit. List correct application version - Nethserver/dev#5819
+- Dedalo: username containing '@' - Bug NethServer/dev#5821
+
 * Thu Jul 25 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.0-1
 - Dedalo Cockpit UI - NethServer/dev#5790
 
