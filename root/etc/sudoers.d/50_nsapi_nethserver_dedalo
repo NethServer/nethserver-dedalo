@@ -1,0 +1,17 @@
+#
+# nsapi_nethserver_dedalo
+#
+Cmnd_Alias NSAPI_NETHSERVER_DEDALO = \
+    /usr/libexec/nethserver/api/nethserver-dedalo/authentication/execute, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/authentication/read, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/authentication/validate, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/dashboard/read, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/logs/execute, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/settings/configuration/read, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/settings/configuration/update, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/settings/configuration/validate, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/settings/registration/execute, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/settings/registration/read, \
+    /usr/libexec/nethserver/api/nethserver-dedalo/settings/registration/validate
+
+Defaults!NSAPI_NETHSERVER_DEDALO !requiretty
