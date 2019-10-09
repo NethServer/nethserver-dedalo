@@ -79,37 +79,24 @@ def get_dashboard_data():
                 # swap input and output octets
                 input_octets_downloaded, output_octets_uploaded = output_octets_uploaded, input_octets_downloaded
                 input_octets_limit, output_octets_limit = output_octets_limit, output_octets_limit
-
-            up_bandwidth = tokens[12]
-            up_bandwidth_perc = up_bandwidth.split("/")[0]
-            up_bandwidth_limit = up_bandwidth.split("/")[1]
-
-            down_bandwidth = tokens[13]
-            down_bandwidth_perc = down_bandwidth.split("/")[0]
-            down_bandwidth_limit = down_bandwidth.split("/")[1]
             
-            user = { 'macAddress': mac_address, 
-                    'ipAddress': ip_address, 
-                    'status': status,
-                    'sessionKey': session_key, 
+            user = {
+                'macAddress': mac_address, 
+                'ipAddress': ip_address, 
+                'status': status,
+                'sessionKey': session_key, 
 
-                    'sessionTimeElapsed': session_time_elapsed, 
-                    'sessionTimeLimit': session_time_limit, 
+                'sessionTimeElapsed': session_time_elapsed, 
+                'sessionTimeLimit': session_time_limit, 
 
-                    'idleTimeElapsed': idle_time_elapsed,
-                    'idleTimeLimit': idle_time_limit,
+                'idleTimeElapsed': idle_time_elapsed,
+                'idleTimeLimit': idle_time_limit,
 
-                    'inputOctetsDownloaded': input_octets_downloaded, 
-                    'inputOctetsLimit': input_octets_limit, 
+                'inputOctetsDownloaded': input_octets_downloaded, 
+                'inputOctetsLimit': input_octets_limit, 
 
-                    'outputOctetsUploaded': output_octets_uploaded, 
-                    'outputOctetsLimit': output_octets_limit,
-
-                    'upBandwidthPerc': up_bandwidth_perc,
-                    'upBandwidthLimit': up_bandwidth_limit,
-                    
-                    'downBandwidthPerc': down_bandwidth_perc,
-                    'downBandwidthLimit': down_bandwidth_limit
+                'outputOctetsUploaded': output_octets_uploaded, 
+                'outputOctetsLimit': output_octets_limit
             }
             users.append(user)
         
