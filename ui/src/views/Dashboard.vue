@@ -69,12 +69,6 @@
             <td class="fancy">
               {{ readableBytes(parseInt(props.row.outputOctetsUploaded)) }}
             </td>
-            <td class="fancy">
-              {{ props.row.downBandwidthPerc }}
-            </td>
-            <td class="fancy">
-              {{ props.row.upBandwidthPerc }}
-            </td>
           </template>
         </vue-good-table>
       </div>
@@ -139,14 +133,6 @@ export default {
         {
           label: this.$i18n.t("dashboard.uploaded"),
           field: "outputOctetsUploaded"
-        },
-        {
-          label: this.$i18n.t("dashboard.download_bandwidth"),
-          field: "downBandwidthPerc"
-        },
-        {
-          label: this.$i18n.t("dashboard.upload_bandwidth"),
-          field: "upBandwidthPerc"
         }
       ]
     };
