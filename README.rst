@@ -117,15 +117,11 @@ Output example (dashboardData)
           "sessionTimeLimit": "2591998",
           "inputOctetsLimit": "0",
           "idleTimeLimit": "0",
-          "upBandwidthLimit": "0",
           "sessionKey": "156358627200000001",
           "idleTimeElapsed": "2",
-          "downBandwidthPerc": "0%",
-          "downBandwidthLimit": "0",
           "outputOctetsUploaded": "121630",
           "ipAddress": "192.168.182.2",
-          "outputOctetsLimit": "0",
-          "upBandwidthPerc": "0%"
+          "outputOctetsLimit": "0"
         }
       ]
     }

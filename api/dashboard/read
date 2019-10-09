@@ -79,14 +79,6 @@ def get_dashboard_data():
                 # swap input and output octets
                 input_octets_downloaded, output_octets_uploaded = output_octets_uploaded, input_octets_downloaded
                 input_octets_limit, output_octets_limit = output_octets_limit, output_octets_limit
-
-            up_bandwidth = tokens[12]
-            up_bandwidth_perc = up_bandwidth.split("/")[0]
-            up_bandwidth_limit = up_bandwidth.split("/")[1]
-
-            down_bandwidth = tokens[13]
-            down_bandwidth_perc = down_bandwidth.split("/")[0]
-            down_bandwidth_limit = down_bandwidth.split("/")[1]
             
             user = { 'macAddress': mac_address, 
                     'ipAddress': ip_address, 
@@ -103,13 +95,7 @@ def get_dashboard_data():
                     'inputOctetsLimit': input_octets_limit, 
 
                     'outputOctetsUploaded': output_octets_uploaded, 
-                    'outputOctetsLimit': output_octets_limit,
-
-                    'upBandwidthPerc': up_bandwidth_perc,
-                    'upBandwidthLimit': up_bandwidth_limit,
-                    
-                    'downBandwidthPerc': down_bandwidth_perc,
-                    'downBandwidthLimit': down_bandwidth_limit
+                    'outputOctetsLimit': output_octets_limit
             }
             users.append(user)
         
