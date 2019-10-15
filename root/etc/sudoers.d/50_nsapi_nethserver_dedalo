@@ -6,7 +6,6 @@ Cmnd_Alias NSAPI_NETHSERVER_DEDALO = \
     /usr/libexec/nethserver/api/nethserver-dedalo/authentication/read, \
     /usr/libexec/nethserver/api/nethserver-dedalo/authentication/validate, \
     /usr/libexec/nethserver/api/nethserver-dedalo/dashboard/read, \
-    /usr/libexec/nethserver/api/nethserver-dedalo/logs/execute, \
     /usr/libexec/nethserver/api/nethserver-dedalo/settings/configuration/read, \
     /usr/libexec/nethserver/api/nethserver-dedalo/settings/configuration/update, \
     /usr/libexec/nethserver/api/nethserver-dedalo/settings/configuration/validate, \
