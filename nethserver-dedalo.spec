@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.3.1
+Version: 1.3.2
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -46,6 +46,9 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Mon Oct 28 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.2-1
+- Logs page in Cockpit - Bug NethServer/dev#5866
+
 * Thu Oct 10 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.1-1
 - Dedalo: remove bandwidth columns in Dashboard page - NethServer/dev#5860
 
