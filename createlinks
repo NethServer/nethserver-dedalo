@@ -89,3 +89,12 @@ event_services($event, qw(
     dedalo stop
 ));
 
+#
+# post-restore-config event
+#
+
+$event = 'post-restore-config';
+
+event_actions($event, qw(
+    nethserver-dedalo-network-reset 03
+));
