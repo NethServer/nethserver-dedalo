@@ -29,8 +29,8 @@ my $ndb = esmith::NetworksDB->open();
 my $cdb = esmith::ConfigDB->open();
 
 if (grep(/^--skip-network$/, @ARGV)) {
+    # Disable dedalo if no interface has hotspot role
     if (scalar($ndb->get_all_by_prop('role', 'hotspot')) <= 0) {
         $cdb->set_prop('dedalo', 'status', 'disabled');
     }
-
 }
