@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.3.3
+Version: 1.3.4
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -46,6 +46,9 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Tue Apr 07 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.4-1
+- Restore configuration without network override - NethServer/dev#6099
+
 * Wed Jan 08 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.3-1
 - Cockpit: change package Dashboard page title - NethServer/dev#6004
 
