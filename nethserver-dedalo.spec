@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.3.4
+Version: 1.3.5
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -46,6 +46,9 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Fri Sep 18 2020 Matteo Valentini <matteo.valentini@nethesis.it> - 1.3.5-1
+- nethserver-dedalo: disable ethernet offload on hostpot interface - Bug NethServer/dev#6264
+
 * Tue Apr 07 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.4-1
 - Restore configuration without network override - NethServer/dev#6099
 
