@@ -20,9 +20,16 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-hotspot_interface=$(/sbin/e-smith/db networks showjson | /usr/bin/jq -r '.[] | select(.props.role=="hotspot") | .name')
+hotspot_interface_type=$(/sbin/e-smith/db networks showjson | /usr/bin/jq -r '.[] | select(.props.role=="hotspot") | .type')
 
-if [ -n "$hotspot_interface" ]
+if [ -n "$hotspot_interface_type" ]
 then
+	hotspot_interface=$(/sbin/e-smith/db networks showjson | /usr/bin/jq -r '.[] | select(.props.role=="hotspot") | .name')
+
+	if [ "$hotspot_interface_type" == "vlan" ]
+	then
+		hotspot_interface=$(echo $hotspot_interface | cut -d '.' -f 1)
+	fi
+
 	/sbin/ethtool -K $hotspot_interface gso off gro off tso off
 fi
