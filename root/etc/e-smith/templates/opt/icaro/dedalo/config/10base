@@ -36,6 +36,7 @@
 
   our $hs_dhcp_start = $dedalo{'DhcpStart'} || '';
   our $hs_dhcp_end = $dedalo{'DhcpEnd'} || '';
+  our $hs_maxclients = $dedalo{'Maxclients'} || '512';
 
   return '';
 }
