@@ -35,6 +35,10 @@ event_templates($event,
    '/opt/icaro/dedalo/config'
 );
 
+event_services($event, qw(
+    dedalo_users_auth restart
+));
+
 #
 # nethserver-dedalo-save event
 #
