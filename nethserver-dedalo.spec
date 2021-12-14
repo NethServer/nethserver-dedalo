@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.3.6
+Version: 1.4.0
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -46,6 +46,9 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Tue Dec 14 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.0-1
+- nethserver-dedalo: hotspot users aren't properly authenticated - Bug NethServer/dev#6610
+
 * Fri Nov 27 2020 Matteo Valentini <matteo.valentini@nethesis.it> - 1.3.6-1
 - nethserver-dedalo: Ethernet offload is still active if a vlan is used as hotspot interface - Bug NethServer/dev#6343
 
