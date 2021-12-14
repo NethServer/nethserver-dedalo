@@ -29,7 +29,7 @@ fi
 
 # Make sure dedalo_users_auth is started if the unit is registerd
 status=$(/sbin/e-smith/config getprop dedalo status)
-if [[ "$status" == "enabled" && -f "/root/.dedalo-token" ]]
+if [[ "$status" == "enabled" && -f "/root/.dedalo-token" ]]; then
     /sbin/e-smith/config setprop dedalo_users_auth status enabled
 else
     /sbin/e-smith/config setprop dedalo_users_auth status disabled
