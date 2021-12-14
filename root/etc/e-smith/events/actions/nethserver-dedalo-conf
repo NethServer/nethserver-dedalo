@@ -29,11 +29,7 @@ fi
 
 # Make sure dedalo_users_auth status is aligned to dedalo service
 status=$(/sbin/e-smith/config getprop dedalo status)
-if [[ "$status" == "enabled" ]]; then
-    /sbin/e-smith/config setprop dedalo_users_auth status enabled
-else
-    /sbin/e-smith/config setprop dedalo_users_auth status disabled
-fi
+/sbin/e-smith/config setprop dedalo_users_auth status "$status"
 
 # Apply configuration
 dedalo config
