@@ -22,8 +22,9 @@
 
 set -e
 
-# Enable dedalo service
+# Disable dedalo service
 /sbin/e-smith/config setprop dedalo status disabled Id ''
+/sbin/e-smith/config setprop dedalo_users_auth status disabled
 
 # retrieve internal unit ID
 dedalo_config=$(/sbin/e-smith/config getjson dedalo)

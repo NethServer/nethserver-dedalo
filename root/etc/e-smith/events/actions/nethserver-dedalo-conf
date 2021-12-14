@@ -27,5 +27,9 @@ if [ -z "$uuid" ]; then
     /sbin/e-smith/config setprop dedalo Uuid $(uuidgen)
 fi
 
+# Make sure dedalo_users_auth status is aligned to dedalo service
+status=$(/sbin/e-smith/config getprop dedalo status)
+/sbin/e-smith/config setprop dedalo_users_auth status "$status"
+
 # Apply configuration
 dedalo config

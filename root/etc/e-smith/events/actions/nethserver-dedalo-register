@@ -30,6 +30,7 @@ dedalo register -t $(cat $tmp_file)
 
 # Enable dedalo service
 /sbin/e-smith/config setprop dedalo status enabled
+/sbin/e-smith/config setprop dedalo_users_auth status enabled
 
 # Expand configuration using dedalo built-in template engine
 dedalo config
