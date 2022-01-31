@@ -59,6 +59,7 @@ Properties
 - ``Proxy``:  can be ``enabled`` or ``disabled``, if ``enabled`` all hotspot traffic will be proxied
 - ``Network``: network for clients connected to Dedalo, default to ``192.168.182.0/24``
 - ``LogTraffic``: can be ``enabled`` or ``disabled``, if enabled along with Proxy, the proxy will log all hotspot traffic inside ``/var/log/squid/dedalo.log``
+- ``Maxclients``: allows the user to override the default DHCP leases limit of chilli of 512. Must be numeric. If empty the deafult value wins.
 - ``status``: can be ``enabled`` or ``disabled``, default to ``disabled``
 
 
@@ -72,6 +73,7 @@ Example: ::
     IcaroHost=hotstpot.nethserver.org
     Id=MyHotel
     LogTraffic=disabled
+    Maxclients=1024
     Network=192.168.182.0/24
     Proxy=disabled
     SplashPageUrl=
