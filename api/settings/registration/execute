@@ -28,6 +28,7 @@ import os
 import tempfile
 import shlex
 import ipaddress
+import time
 
 def register(input_json):
     hotspot_id = input_json['hotspotId']
@@ -106,6 +107,12 @@ def register(input_json):
 
             if return_code != 0:
                 return "Event failed, see /var/log/messages"
+
+            # after interface-update wait some seconds before launch registration.
+            # the nethserver-dedalo-register fails if executed immediately after
+            # interface-update
+            time.sleep(15)
+
     except Exception, e:
         return "Event failed, see /var/log/messages: %s" % e
 
@@ -133,7 +140,7 @@ def register(input_json):
                 return "Event failed, see /var/log/messages"
         except Exception, e:
             return "Event failed, see /var/log/messages: %s" % e
-            
+
 def unregister(input_json, logout_user):
     try:
         bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-unregister"
@@ -159,7 +166,7 @@ try:
     elif app_info == 'unregister':
         logout = input_json["logout"]
         error = unregister(input_json, logout)
-        
+
     if error:
         output = simplejson.dumps({'state': 'error', 'message': error})
         print(output)
