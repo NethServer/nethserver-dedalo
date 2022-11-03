@@ -88,27 +88,6 @@ def register(input_json):
     except Exception, e:
         return "Error setting hotspot role for network %s: %s" % (network, e)
 
-    # perform interface-update if selected device is not physical, or at least an interface role has been removed (role_reset = True)
-    try:
-        bash_command = "/sbin/e-smith/db networks gettype %s" % network_device
-        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        return_code = process.returncode
-
-        if return_code != 0:
-            return "Event failed, see /var/log/messages"
-
-        if output.rstrip() != "ethernet" or role_reset:
-            bash_command = "/sbin/e-smith/signal-event -j interface-update"
-            process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
-            output, error = process.communicate()
-            return_code = process.returncode
-
-            if return_code != 0:
-                return "Event failed, see /var/log/messages"
-    except Exception, e:
-        return "Event failed, see /var/log/messages: %s" % e
-
     token_json = None
 
     # write token to temp file
@@ -133,7 +112,29 @@ def register(input_json):
                 return "Event failed, see /var/log/messages"
         except Exception, e:
             return "Event failed, see /var/log/messages: %s" % e
-            
+
+    # perform interface-update if selected device is not physical, or at least an interface role has been removed (role_reset = True)
+    try:
+        bash_command = "/sbin/e-smith/db networks gettype %s" % network_device
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        return_code = process.returncode
+
+        if return_code != 0:
+            return "Event failed, see /var/log/messages"
+
+        if output.rstrip() != "ethernet" or role_reset:
+            bash_command = "/sbin/e-smith/signal-event -j interface-update"
+            process = subprocess.Popen(bash_command.split(), stdout=sys.stdout, stderr=sys.stderr)
+            output, error = process.communicate()
+            return_code = process.returncode
+
+            if return_code != 0:
+                return "Event failed, see /var/log/messages"
+
+    except Exception, e:
+        return "Event failed, see /var/log/messages: %s" % e
+
 def unregister(input_json, logout_user):
     try:
         bash_command = "/sbin/e-smith/signal-event -j nethserver-dedalo-unregister"
@@ -159,7 +160,7 @@ try:
     elif app_info == 'unregister':
         logout = input_json["logout"]
         error = unregister(input_json, logout)
-        
+
     if error:
         output = simplejson.dumps({'state': 'error', 'message': error})
         print(output)
