@@ -1,5 +1,5 @@
 Name: nethserver-dedalo
-Version: 1.5.0
+Version: 1.5.1
 Release: 1%{?dist}
 Summary: Dedalo integration for NethServer
 BuildArch: noarch
@@ -46,6 +46,9 @@ cp -a api/* %{buildroot}/usr/libexec/nethserver/api/%{name}/
 %dir %{_nseventsdir}/%{name}-update
 
 %changelog
+* Thu Nov 10 2022 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.5.1-1
+- Dedalo: registration fails if interface-update is triggered - Bug NethServer/dev#6717
+
 * Thu Feb 03 2022 Edoardo Spadoni <edoardo.spadoni@nethesis.it> - 1.5.0-1
 - Customize Chilli DHCP Leases - NethServer/dev#6634
 
